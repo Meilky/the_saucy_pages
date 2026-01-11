@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS recipes (
+	uuid BLOB PRIMARY KEY NOT NULL,
+	name TEXT NOT NULL,
+	description TEXT NOT NULL
+);
