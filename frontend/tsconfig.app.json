@@ -15,7 +15,21 @@
      */
     "allowJs": true,
     "checkJs": true,
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+	"paths": {
+      "$components": [
+        "./src/components"
+      ],
+      "$components/*": [
+        "./src/components/*"
+      ],
+      "$api": [
+        "./src/api"
+      ],
+      "$api/*": [
+        "./src/api/*"
+      ]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }
