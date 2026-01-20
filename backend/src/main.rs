@@ -1,9 +1,17 @@
+use std::sync::Arc;
+
 use dotenv::dotenv;
 use sqlx::sqlite::SqlitePoolOptions;
 
+use crate::{
+    api::AppState, repositories::recipe::RecipeRepository, services::recipe::RecipeService,
+};
+
 mod api;
+mod controllers;
 mod models;
-mod routes;
+mod repositories;
+mod services;
 
 #[tokio::main]
 async fn main() {
@@ -20,9 +28,14 @@ async fn main() {
         .await
         .unwrap();
 
+    let recipe_repository = RecipeRepository::new(sqlite_pool);
+    let recipe_service = RecipeService::new(recipe_repository);
+
+    let app_state: Arc<AppState> = Arc::new(AppState { recipe_service });
+
     let listener = tokio::net::TcpListener::bind("0.0.0.0:5055").await.unwrap();
 
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
 
-    let _ = axum::serve(listener, api::get_api(sqlite_pool)).await;
+    let _ = axum::serve(listener, api::get_api(app_state)).await;
 }

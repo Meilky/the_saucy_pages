@@ -1,17 +1,22 @@
+use std::sync::Arc;
+
 use axum::{
-    Extension, Router,
-    routing::{delete, get},
+    Router,
+    routing::get,
 };
-use sqlx::{Pool, Sqlite};
 
-use crate::routes::recipes;
+use crate::controllers::recipe;
+use crate::services::recipe::RecipeService;
 
-pub fn get_api(pool: Pool<Sqlite>) -> Router {
+pub struct AppState {
+    pub recipe_service: RecipeService,
+}
+
+pub fn get_api(shared_state: Arc<AppState>) -> Router {
     Router::new()
         .route(
             "/api/recipes",
-            get(recipes::get_recipes).post(recipes::post_recipe),
+            get(recipe::get_recipes).post(recipe::post_recipe),
         )
-        .route("/api/recipes/{uuid}", delete(recipes::delete_recipe))
-        .layer(Extension(pool))
+        .with_state(shared_state)
 }
