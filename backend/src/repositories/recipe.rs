@@ -63,7 +63,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn it_works() {
+    async fn find_all_return_empty_db() {
         let repo = create_repo().await;
 
         let result = repo.find_all().await;
@@ -73,5 +73,50 @@ mod tests {
         let data = result.unwrap();
 
         assert_eq!(data.len(), 0);
+    }
+
+    #[tokio::test]
+    async fn insert_return_the_new_recipe() {
+        let repo = create_repo().await;
+
+        let recipe_name = "test name".to_string();
+        let recipe_description = "test description".to_string();
+
+        let result = repo
+            .create(CreateRecipe {
+                name: recipe_name.clone(),
+                description: recipe_description.clone(),
+            })
+            .await;
+
+        assert!(result.is_ok());
+
+        let data = result.unwrap();
+
+        assert_eq!(data.name, recipe_name);
+        assert_eq!(data.description, recipe_description);
+    }
+
+    #[tokio::test]
+    async fn find_all_should_return_one_recipe_after_creation() {
+        let repo = create_repo().await;
+
+        let recipe_name = "test name".to_string();
+        let recipe_description = "test description".to_string();
+
+        repo.create(CreateRecipe {
+            name: recipe_name.clone(),
+            description: recipe_description.clone(),
+        })
+        .await
+        .unwrap();
+
+        let result = repo.find_all().await;
+
+        assert!(result.is_ok());
+
+        let data = result.unwrap();
+
+        assert_eq!(data.len(), 1);
     }
 }

@@ -29,6 +29,8 @@ async fn main() {
         .await
         .unwrap();
 
+    sqlx::migrate!().run(&sqlite_pool).await.unwrap();
+
     let recipe_repository = RecipeRepository::new(sqlite_pool);
     let recipe_service = RecipeService::new(recipe_repository);
 
