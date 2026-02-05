@@ -40,5 +40,7 @@ async fn main() {
 
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
 
-    let _ = axum::serve(listener, api::get_api(app_state)).await;
+    axum::serve(listener, api::get_api(app_state))
+        .await
+        .unwrap();
 }
