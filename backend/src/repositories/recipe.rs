@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     error::AppError,
     models::recipe::{CreateRecipe, Recipe},
@@ -5,11 +7,11 @@ use crate::{
 use sqlx::{Pool, Sqlite};
 
 pub struct RecipeRepository {
-    pool: Pool<Sqlite>,
+    pool: Arc<Pool<Sqlite>>,
 }
 
 impl RecipeRepository {
-    pub fn new(pool: Pool<Sqlite>) -> Self {
+    pub fn new(pool: Arc<Pool<Sqlite>>) -> Self {
         Self { pool }
     }
 
@@ -25,7 +27,7 @@ impl RecipeRepository {
         .bind(recipe.uuid)
         .bind(recipe.name.clone())
         .bind(recipe.description.clone())
-        .execute(&self.pool)
+        .execute(&*self.pool)
         .await?;
 
         Ok(recipe)
@@ -33,7 +35,7 @@ impl RecipeRepository {
 
     pub async fn find_all(&self) -> Result<Vec<Recipe>, AppError> {
         sqlx::query_as::<_, Recipe>("SELECT uuid, name, description FROM recipes;")
-            .fetch_all(&self.pool)
+            .fetch_all(&*self.pool)
             .await
             .map_err(|_e| AppError::InternalServerError)
     }
@@ -41,6 +43,8 @@ impl RecipeRepository {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use super::*;
     use sqlx::sqlite::SqlitePoolOptions;
 
@@ -56,15 +60,10 @@ mod tests {
         pool
     }
 
-    async fn create_repo() -> RecipeRepository {
-        let pool = create_pool().await;
-
-        RecipeRepository::new(pool)
-    }
-
     #[tokio::test]
     async fn find_all_return_empty_db() {
-        let repo = create_repo().await;
+        let pool = create_pool().await;
+        let repo = RecipeRepository::new(Arc::new(pool));
 
         let result = repo.find_all().await;
 
@@ -77,7 +76,8 @@ mod tests {
 
     #[tokio::test]
     async fn insert_return_the_new_recipe() {
-        let repo = create_repo().await;
+        let pool = create_pool().await;
+        let repo = RecipeRepository::new(Arc::new(pool));
 
         let recipe_name = "test name".to_string();
         let recipe_description = "test description".to_string();
@@ -99,7 +99,8 @@ mod tests {
 
     #[tokio::test]
     async fn find_all_should_return_one_recipe_after_creation() {
-        let repo = create_repo().await;
+        let pool = create_pool().await;
+        let repo = RecipeRepository::new(Arc::new(pool));
 
         let recipe_name = "test name".to_string();
         let recipe_description = "test description".to_string();

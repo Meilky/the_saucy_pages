@@ -4,7 +4,9 @@ use dotenv::dotenv;
 use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
-    api::AppState, repositories::recipe::RecipeRepository, services::recipe::RecipeService,
+    api::AppState,
+    repositories::{ingredient::IngredientRepository, recipe::RecipeRepository},
+    services::{ingredient::IngredientService, recipe::RecipeService},
 };
 
 mod api;
@@ -31,10 +33,18 @@ async fn main() {
 
     sqlx::migrate!().run(&sqlite_pool).await.unwrap();
 
-    let recipe_repository = RecipeRepository::new(sqlite_pool);
+    let arc_pool = Arc::new(sqlite_pool);
+
+    let ingredient_repository = IngredientRepository::new(Arc::clone(&arc_pool));
+    let recipe_repository = RecipeRepository::new(Arc::clone(&arc_pool));
+
+    let ingredient_service = IngredientService::new(ingredient_repository);
     let recipe_service = RecipeService::new(recipe_repository);
 
-    let app_state: Arc<AppState> = Arc::new(AppState { recipe_service });
+    let app_state: Arc<AppState> = Arc::new(AppState {
+        recipe_service,
+        ingredient_service,
+    });
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:5055").await.unwrap();
 
