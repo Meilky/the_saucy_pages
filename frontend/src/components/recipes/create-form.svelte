@@ -14,23 +14,21 @@
 
 		name = "";
 		description = "";
-
-		data = getRecipes();
 	}
 </script>
 
 <form onsubmit={onFormSubmit}>
 	<fieldset class="space-y-4">
-		<label class="label">
-			<label class="label-text">Name</label>
-			<input class="input" type="text" bind:value={name} />
+		<label>
+			Name
+			<input type="text" bind:value={name} />
 		</label>
 		<label class="label">
-			<label class="label-text">Description</label>
-			<input class="input" type="text" bind:value={description} />
+			Description
+			<input type="text" bind:value={description} />
 		</label>
 	</fieldset>
-	<fieldset class="flex justify-end">
-		<button type="button" class="btn preset-outlined-surface-300-700">Submit</button>
+	<fieldset>
+		<button type="button"> Submit </button>
 	</fieldset>
 </form>

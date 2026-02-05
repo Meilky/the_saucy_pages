@@ -16,9 +16,9 @@ export async function createRecipe(recipeToCreate: CreateRecipe): Promise<Recipe
 	const response = await fetch("/api/recipes", {
 		method: "POST",
 		headers: {
-			"Content-Type": "application/json"
+			"Content-Type": "application/json",
 		},
-		body: JSON.stringify(recipeToCreate)
+		body: JSON.stringify(recipeToCreate),
 	});
 
 	if (!response.ok) {
