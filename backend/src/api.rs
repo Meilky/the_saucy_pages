@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use axum::{
-    Router,
-    routing::get,
-};
+use axum::{Router, routing::get};
 
 use crate::controllers::recipe;
 use crate::services::recipe::RecipeService;

@@ -9,10 +9,10 @@ use crate::{
 
 mod api;
 mod controllers;
+mod error;
 mod models;
 mod repositories;
 mod services;
-mod error;
 
 #[tokio::main]
 async fn main() {
