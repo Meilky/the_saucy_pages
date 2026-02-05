@@ -12,6 +12,7 @@ mod controllers;
 mod models;
 mod repositories;
 mod services;
+mod error;
 
 #[tokio::main]
 async fn main() {

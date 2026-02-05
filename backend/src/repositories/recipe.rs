@@ -1,4 +1,7 @@
-use crate::models::recipe::{CreateRecipe, Recipe};
+use crate::{
+    error::AppError,
+    models::recipe::{CreateRecipe, Recipe},
+};
 use sqlx::{Pool, Sqlite};
 
 pub struct RecipeRepository {
@@ -10,7 +13,7 @@ impl RecipeRepository {
         Self { pool }
     }
 
-    pub async fn create(&self, data: CreateRecipe) -> Result<Recipe, sqlx::Error> {
+    pub async fn create(&self, data: CreateRecipe) -> Result<Recipe, AppError> {
         let recipe: Recipe = data.into();
 
         sqlx::query(
@@ -28,9 +31,10 @@ impl RecipeRepository {
         Ok(recipe)
     }
 
-    pub async fn find_all(&self) -> Result<Vec<Recipe>, sqlx::Error> {
+    pub async fn find_all(&self) -> Result<Vec<Recipe>, AppError> {
         sqlx::query_as::<_, Recipe>("SELECT uuid, name, description FROM recipes;")
             .fetch_all(&self.pool)
             .await
+            .map_err(|_e| AppError::InternalServerError)
     }
 }

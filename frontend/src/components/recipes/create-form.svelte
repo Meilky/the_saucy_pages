@@ -18,17 +18,20 @@
 </script>
 
 <form onsubmit={onFormSubmit}>
-	<fieldset class="space-y-4">
-		<label>
-			Name
-			<input type="text" bind:value={name} />
-		</label>
-		<label class="label">
-			Description
-			<input type="text" bind:value={description} />
-		</label>
-	</fieldset>
 	<fieldset>
-		<button type="button"> Submit </button>
+		<legend>New recipe</legend>
+		<label for="name">Name</label>
+		<input type="text" name="name" bind:value={name} />
+		<label for="description">Description</label>
+		<input type="text" name="description" bind:value={description} />
 	</fieldset>
+	<input type="submit" value="Submit" />
+	<input type="reset" value="Reset" />
 </form>
+
+<style>
+	fieldset {
+		display: grid;
+		grid-template-columns: auto auto;
+	}
+</style>
