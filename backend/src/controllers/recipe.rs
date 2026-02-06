@@ -3,31 +3,13 @@ use std::sync::Arc;
 use axum::{Json, extract::State};
 
 use crate::{
-    api::AppState,
-    error::AppError,
-    models::recipe::{CreateRecipe, Recipe},
+    api::AppState, error::AppError, models::recipe::{CreateRecipe, Recipe}
 };
 
 pub async fn get_recipes(
     State(app_state): State<Arc<AppState>>,
-) -> Result<Json<Vec<Recipe>>, (axum::http::StatusCode, String)> {
-    let recipes = app_state
-        .recipe_service
-        .list_recipes()
-        .await
-        .map_err(|error| {
-            tracing::error!("{:?}", error);
-
-            match error {
-                AppError::RecipeError(_r_err) => {
-                    (axum::http::StatusCode::BAD_REQUEST, "error".into())
-                }
-                _ => (
-                    axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-                    "Internal Server Error".into(),
-                ),
-            }
-        })?;
+) -> Result<Json<Vec<Recipe>>, AppError> {
+    let recipes = app_state.recipe_service.list_recipes().await?;
 
     Ok(Json(recipes))
 }
@@ -35,24 +17,8 @@ pub async fn get_recipes(
 pub async fn post_recipe(
     State(app_state): State<Arc<AppState>>,
     Json(payload): Json<CreateRecipe>,
-) -> Result<Json<Recipe>, (axum::http::StatusCode, String)> {
-    let recipe = app_state
-        .recipe_service
-        .create_recipe(payload)
-        .await
-        .map_err(|error| {
-            tracing::error!("{:?}", error);
-
-            match error {
-                AppError::RecipeError(_r_err) => {
-                    (axum::http::StatusCode::BAD_REQUEST, "error".into())
-                }
-                _ => (
-                    axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-                    "Internal Server Error".into(),
-                ),
-            }
-        })?;
+) -> Result<Json<Recipe>, AppError> {
+    let recipe = app_state.recipe_service.create_recipe(payload).await?;
 
     Ok(Json(recipe))
 }
