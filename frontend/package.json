@@ -16,10 +16,10 @@
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tsconfig/svelte": "^5.0.7",
-		"@types/node": "^25.2.0",
+		"@types/node": "^25.2.1",
 		"oxfmt": "^0.28.0",
 		"oxlint": "^1.43.0",
-		"svelte": "^5.49.2",
+		"svelte": "^5.50.0",
 		"svelte-check": "^4.3.6",
 		"typescript": "~5.9.3",
 		"vite": "npm:rolldown-vite@7.3.1"

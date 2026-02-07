@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { createIngredient } from "$api/ingredients";
 
+	interface Props {
+		onSubmited?: () => void;
+	}
+
+	const props: Props = $props();
+
 	let name = $state("");
 	let description = $state("");
 
@@ -14,6 +20,8 @@
 
 		name = "";
 		description = "";
+
+		props.onSubmited?.();
 	}
 </script>
 

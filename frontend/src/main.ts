@@ -1,13 +1,10 @@
+import "./app.css";
 import { mount } from "svelte";
 
-import App from "./components/app.svelte";
+import RootPage from "./pages/root.svelte";
 
-const app = mount(App, {
-	target: document.getElementById("app")!,
+const rootPage = mount(RootPage, {
+	target: document.body,
 });
 
-window.addEventListener("navigate", (event) => {
-	console.log(event)
-})
-
-export default app;
+export default rootPage;
