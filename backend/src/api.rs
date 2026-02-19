@@ -6,12 +6,15 @@ use crate::controllers::{ingredient, recipe};
 use crate::services::ingredient::IngredientService;
 use crate::services::recipe::RecipeService;
 
-pub struct AppState {
-    pub recipe_service: RecipeService,
+pub struct AppState<RS>
+where
+    RS: RecipeService,
+{
+    pub recipe_service: RS,
     pub ingredient_service: IngredientService,
 }
 
-pub fn get_api(shared_state: Arc<AppState>) -> Router {
+pub fn get_api<RS: RecipeService + Sync + Send>(shared_state: Arc<AppState<RS>>) -> Router {
     Router::new()
         .route(
             "/api/recipes",

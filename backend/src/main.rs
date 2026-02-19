@@ -5,8 +5,8 @@ use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
     api::AppState,
-    repositories::{ingredient::IngredientRepository, recipe::RecipeRepository},
-    services::{ingredient::IngredientService, recipe::RecipeService},
+    repositories::{ingredient::IngredientRepository, recipe::ImplRecipeRepository},
+    services::{ingredient::IngredientService, recipe::{ImpRecipeService, RecipeService}},
 };
 
 mod api;
@@ -36,12 +36,12 @@ async fn main() {
     let arc_pool = Arc::new(sqlite_pool);
 
     let ingredient_repository = IngredientRepository::new(Arc::clone(&arc_pool));
-    let recipe_repository = RecipeRepository::new(Arc::clone(&arc_pool));
+    let recipe_repository = ImplRecipeRepository::new(Arc::clone(&arc_pool));
 
     let ingredient_service = IngredientService::new(ingredient_repository);
-    let recipe_service = RecipeService::new(recipe_repository);
+    let recipe_service = ImpRecipeService::new(recipe_repository);
 
-    let app_state: Arc<AppState> = Arc::new(AppState {
+    let app_state = Arc::new(AppState {
         recipe_service,
         ingredient_service,
     });
