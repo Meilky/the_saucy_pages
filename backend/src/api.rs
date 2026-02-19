@@ -3,18 +3,16 @@ use std::sync::Arc;
 use axum::{Router, routing::get};
 
 use crate::controllers::{ingredient, recipe};
+use crate::repositories::recipe::ImplRecipeRepository;
 use crate::services::ingredient::IngredientService;
-use crate::services::recipe::RecipeService;
+use crate::services::recipe::{ImplRecipeService};
 
-pub struct AppState<RS>
-where
-    RS: RecipeService,
-{
-    pub recipe_service: RS,
+pub struct HttpAppState {
+    pub recipe_service: ImplRecipeService<ImplRecipeRepository>,
     pub ingredient_service: IngredientService,
 }
 
-pub fn get_api<RS: RecipeService + Sync + Send>(shared_state: Arc<AppState<RS>>) -> Router {
+pub fn get_api(shared_state: Arc<HttpAppState>) -> Router {
     Router::new()
         .route(
             "/api/recipes",

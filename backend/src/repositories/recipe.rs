@@ -6,7 +6,7 @@ use crate::{
 };
 use sqlx::{Pool, Sqlite};
 
-pub trait RecipeRepository {
+pub trait RecipeRepository: Send + Sync {
     async fn create(&self, data: CreateRecipe) -> Result<Recipe, AppError>;
     async fn find_all(&self) -> Result<Vec<Recipe>, AppError>;
 }

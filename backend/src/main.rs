@@ -4,9 +4,9 @@ use dotenv::dotenv;
 use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
-    api::AppState,
+    api::HttpAppState,
     repositories::{ingredient::IngredientRepository, recipe::ImplRecipeRepository},
-    services::{ingredient::IngredientService, recipe::{ImpRecipeService, RecipeService}},
+    services::{ingredient::IngredientService, recipe::ImplRecipeService},
 };
 
 mod api;
@@ -39,9 +39,9 @@ async fn main() {
     let recipe_repository = ImplRecipeRepository::new(Arc::clone(&arc_pool));
 
     let ingredient_service = IngredientService::new(ingredient_repository);
-    let recipe_service = ImpRecipeService::new(recipe_repository);
+    let recipe_service = ImplRecipeService::new(recipe_repository);
 
-    let app_state = Arc::new(AppState {
+    let app_state = Arc::new(HttpAppState {
         recipe_service,
         ingredient_service,
     });

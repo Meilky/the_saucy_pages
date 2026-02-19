@@ -1,33 +1,23 @@
 use crate::error::{AppError, RecipeError};
-use crate::models::recipe::{CreateRecipe, Recipe, UpdateRecipe};
+use crate::models::recipe::{CreateRecipe, Recipe};
 use crate::repositories::recipe::RecipeRepository;
 
-pub trait RecipeService {
+pub trait RecipeService: Send + Sync {
     async fn list_recipes(&self) -> Result<Vec<Recipe>, AppError>;
     async fn create_recipe(&self, data: CreateRecipe) -> Result<Recipe, AppError>;
-    async fn update_recipe(&self, data: UpdateRecipe) -> Result<Recipe, AppError>;
 }
 
-pub struct ImplRecipeService<Repo>
-where
-    Repo: RecipeRepository,
-{
+pub struct ImplRecipeService<Repo: RecipeRepository> {
     repo: Repo,
 }
 
-impl<Repo> ImplRecipeService<Repo>
-where
-    Repo: RecipeRepository,
-{
+impl<Repo: RecipeRepository> ImplRecipeService<Repo> {
     pub fn new(repo: Repo) -> Self {
         Self { repo }
     }
 }
 
-impl<Repo> RecipeService for ImplRecipeService<Repo>
-where
-    Repo: RecipeRepository,
-{
+impl<Repo: RecipeRepository> RecipeService for ImplRecipeService<Repo> {
     async fn list_recipes(&self) -> Result<Vec<Recipe>, AppError> {
         self.repo.find_all().await
     }
@@ -40,21 +30,5 @@ where
         }
 
         self.repo.create(data).await
-    }
-
-    async fn update_recipe(&self, data: UpdateRecipe) -> Result<Recipe, AppError> {
-        if let Some(name) = data.name
-            && name.len() == 0
-        {
-            return Err(RecipeError::NameTooShort.into());
-        }
-
-        if let Some(description) = data.description
-            && description.len() == 0
-        {
-            return Err(RecipeError::DescriptionTooShort.into());
-        }
-
-        Err(AppError::InternalServerError)
     }
 }
