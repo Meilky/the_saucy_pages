@@ -6,16 +6,23 @@ use crate::{
 };
 use sqlx::{Pool, Sqlite};
 
-pub struct IngredientRepository {
+pub trait IngredientRepository: Send + Sync {
+    async fn create(&self, data: CreateIngredient) -> Result<Ingredient, AppError>;
+    async fn find_all(&self) -> Result<Vec<Ingredient>, AppError>;
+}
+
+pub struct ImplIngredientRepository {
     pool: Arc<Pool<Sqlite>>,
 }
 
-impl IngredientRepository {
+impl ImplIngredientRepository {
     pub fn new(pool: Arc<Pool<Sqlite>>) -> Self {
         Self { pool }
     }
+}
 
-    pub async fn create(&self, data: CreateIngredient) -> Result<Ingredient, AppError> {
+impl IngredientRepository for ImplIngredientRepository {
+    async fn create(&self, data: CreateIngredient) -> Result<Ingredient, AppError> {
         let ingredient: Ingredient = data.into();
 
         sqlx::query(
@@ -33,7 +40,7 @@ impl IngredientRepository {
         Ok(ingredient)
     }
 
-    pub async fn find_all(&self) -> Result<Vec<Ingredient>, AppError> {
+    async fn find_all(&self) -> Result<Vec<Ingredient>, AppError> {
         sqlx::query_as::<_, Ingredient>("SELECT uuid, name, description FROM ingredients;")
             .fetch_all(&*self.pool)
             .await
@@ -61,7 +68,7 @@ mod tests {
     #[tokio::test]
     async fn find_all_return_empty_db() {
         let pool = create_pool().await;
-        let repo = IngredientRepository::new(Arc::new(pool));
+        let repo = ImplIngredientRepository::new(Arc::new(pool));
 
         let result = repo.find_all().await;
 
@@ -75,7 +82,7 @@ mod tests {
     #[tokio::test]
     async fn insert_return_the_new_ingredient() {
         let pool = create_pool().await;
-        let repo = IngredientRepository::new(Arc::new(pool));
+        let repo = ImplIngredientRepository::new(Arc::new(pool));
 
         let ingredient_name = "test name".to_string();
         let ingredient_description = Some("test description".to_string());
@@ -99,7 +106,7 @@ mod tests {
     #[tokio::test]
     async fn insert_return_the_new_ingredient_without_description() {
         let pool = create_pool().await;
-        let repo = IngredientRepository::new(Arc::new(pool));
+        let repo = ImplIngredientRepository::new(Arc::new(pool));
 
         let ingredient_name = "test name".to_string();
         let ingredient_description: Option<String> = None;
@@ -122,7 +129,7 @@ mod tests {
     #[tokio::test]
     async fn find_all_should_return_one_ingredient_after_creation() {
         let pool = create_pool().await;
-        let repo = IngredientRepository::new(Arc::new(pool));
+        let repo = ImplIngredientRepository::new(Arc::new(pool));
 
         let ingredient_name = "test name".to_string();
         let ingredient_description = Some("test description".to_string());

@@ -1,7 +1,7 @@
 use crate::error::AppError;
 
 use axum::{
-    http::{StatusCode},
+    http::StatusCode,
     response::{IntoResponse, Response},
 };
 

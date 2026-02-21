@@ -5,7 +5,7 @@ use axum::{Json, extract::State};
 use crate::{
     api::HttpAppState,
     error::AppError,
-    models::ingredient::{CreateIngredient, Ingredient},
+    models::ingredient::{CreateIngredient, Ingredient}, services::ingredient::IngredientService,
 };
 
 pub async fn get_ingredients(
