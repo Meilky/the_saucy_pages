@@ -21,7 +21,7 @@
 		"oxlint": "^1.50.0",
 		"svelte": "^5.53.3",
 		"svelte-check": "^4.4.3",
-		"typescript": "~5.9.3",
+		"typescript": "^6.0.0-beta",
 		"vite": "npm:rolldown-vite@7.3.1"
 	},
 	"overrides": {
