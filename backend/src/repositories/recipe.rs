@@ -2,9 +2,25 @@ use std::sync::Arc;
 
 use crate::{
     error::AppError,
-    models::recipe::{CreateRecipe, Recipe},
+    models::recipe::{CreateRecipe, Recipe, RecipeIngredient},
 };
 use sqlx::{Pool, Sqlite};
+use uuid::Uuid;
+
+#[derive(sqlx::FromRow, Clone)]
+struct RecipeIngredientDTO {
+    pub uuid_ingredient: Uuid,
+    pub amount: f32,
+}
+
+impl Into<RecipeIngredient> for RecipeIngredientDTO {
+    fn into(self) -> RecipeIngredient {
+        RecipeIngredient {
+            uuid: self.uuid_ingredient,
+            amount: self.amount,
+        }
+    }
+}
 
 pub trait RecipeRepository: Send + Sync {
     async fn create(&self, data: CreateRecipe) -> Result<Recipe, AppError>;
@@ -31,20 +47,46 @@ impl RecipeRepository for ImplRecipeRepository {
             VALUES (?, ?, ?);
             "#,
         )
-        .bind(recipe.uuid)
+        .bind(recipe.uuid.clone())
         .bind(recipe.name.clone())
         .bind(recipe.description.clone())
         .execute(&*self.pool)
         .await?;
 
+        for ingredient in recipe.ingredients.iter() {
+            sqlx::query(
+                r#"
+                INSERT INTO recipes_ingredients (uuid_recipe, uuid_ingredient, amount)
+                VALUES (?, ?, ?);
+                "#,
+            )
+            .bind(recipe.uuid.clone())
+            .bind(ingredient.uuid.clone())
+            .bind(ingredient.amount.clone())
+            .execute(&*self.pool)
+            .await?;
+        }
+
         Ok(recipe)
     }
 
     async fn find_all(&self) -> Result<Vec<Recipe>, AppError> {
-        sqlx::query_as::<_, Recipe>("SELECT uuid, name, description FROM recipes;")
+        let mut recipes =
+            sqlx::query_as::<_, Recipe>("SELECT uuid, name, description FROM recipes;")
+                .fetch_all(&*self.pool)
+                .await?;
+
+        for recipe in recipes.iter_mut() {
+            let ingredients_dto = sqlx::query_as::<_, RecipeIngredientDTO>(
+                "SELECT uuid_ingredient, amount FROM recipes_ingredients;",
+            )
             .fetch_all(&*self.pool)
-            .await
-            .map_err(|_e| AppError::InternalServerError)
+            .await?;
+
+            recipe.ingredients = ingredients_dto.iter().map(|v| v.clone().into()).collect();
+        }
+
+        Ok(recipes)
     }
 }
 
