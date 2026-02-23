@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use crate::{
     error::AppError,
-    models::{ingredient::{CreateIngredient, Ingredient}, recipe::Recipe},
+    models::{
+        ingredient::{CreateIngredient, Ingredient},
+        recipe::Recipe,
+    },
 };
 use sqlx::{Pool, Sqlite};
 
