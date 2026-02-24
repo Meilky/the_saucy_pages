@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { createRecipe } from "$api/recipes";
+    import type { Ingredient } from "../../models/ingredient";
 	import type { RecipeIngredient } from "../../models/recipe";
 
 	interface Props {
 		onSubmited?: () => void;
+		ingredients: Ingredient[];
 	}
 
 	const props: Props = $props();
@@ -44,8 +46,8 @@
 
 	function addIngredient() {
 		ingredients.push({
-			uuid: "123",
-			amount: 14,
+			uuid: "",
+			amount: 0,
 		});
 	}
 
@@ -68,9 +70,16 @@
 			console.log(`Edit: ${uuid}`);
 		};
 	}
+
+	const datalistId = $props.id();
 </script>
 
 <form onsubmit={onFormSubmit} onreset={onFormReset}>
+	<datalist id={datalistId}>
+		{#each props.ingredients as ingredient}
+			<option value={ingredient.uuid} label={ingredient.name}></option>
+		{/each}
+	</datalist>
 	<fieldset>
 		<legend>New recipe</legend>
 		<label for="name">Name</label>
@@ -92,8 +101,8 @@
 			<tbody>
 				{#each ingredients as ingredient}
 					<tr>
-						<td>{ingredient.uuid}</td>
-						<td>{ingredient.amount}</td>
+						<td><input list={datalistId} bind:value={ingredient.uuid}></td>
+						<td><input type="number" min="0" step="0.1" bind:value={ingredient.amount}></td>
 						<td>
 							<button
 								type="button"
@@ -130,5 +139,9 @@
 	table {
 		grid-column-start: 1;
 		grid-column-end: 3;
+	}
+
+	td > input {
+		width: 100%;
 	}
 </style>
