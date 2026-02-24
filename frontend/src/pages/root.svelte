@@ -4,6 +4,7 @@
 
 	import IngredientsPage from "./ingredients.svelte";
 	import NewIngredientPage from "./new-ingredient.svelte";
+    import RecipeDetailsPage from "./recipe-details.svelte";
 
 	import NotFound from "./404.svelte";
 
@@ -20,6 +21,10 @@
 
 	router.addRoute(/^\/recipes\/new\/?$/, () => {
 		CurrentPage = NewRecipePage;
+	});
+
+	router.addRoute(/^\/recipes\/[0-9a-f]{8}(?:\-[0-9a-f]{4}){3}-[0-9a-f]{12}\/?$/, () => {
+		CurrentPage = RecipeDetailsPage;
 	});
 
 	router.addRoute(/^\/ingredients\/?$/, () => {

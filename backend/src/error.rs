@@ -19,6 +19,7 @@ pub enum RecipeError {
 #[derive(Debug)]
 pub enum AppError {
     InternalServerError,
+    NotFoundError,
     RecipeError(RecipeError),
     IngredientError(IngredientError),
 }
@@ -36,7 +37,10 @@ impl From<IngredientError> for AppError {
 }
 
 impl From<sqlx::Error> for AppError {
-    fn from(_value: sqlx::Error) -> Self {
-        AppError::InternalServerError
+    fn from(value: sqlx::Error) -> Self {
+        match value {
+            sqlx::Error::RowNotFound => AppError::NotFoundError,
+            _ => AppError::InternalServerError,
+        }
     }
 }

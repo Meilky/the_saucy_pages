@@ -1,9 +1,12 @@
+use uuid::Uuid;
+
 use crate::error::{AppError, RecipeError};
 use crate::models::recipe::{CreateRecipe, Recipe};
 use crate::repositories::recipe::RecipeRepository;
 
 pub trait RecipeService: Send + Sync {
     async fn list_recipes(&self) -> Result<Vec<Recipe>, AppError>;
+    async fn find_recipe_by_uuid(&self, uuid: Uuid) -> Result<Recipe, AppError>;
     async fn create_recipe(&self, data: CreateRecipe) -> Result<Recipe, AppError>;
 }
 
@@ -20,6 +23,10 @@ impl<Repo: RecipeRepository> ImplRecipeService<Repo> {
 impl<Repo: RecipeRepository> RecipeService for ImplRecipeService<Repo> {
     async fn list_recipes(&self) -> Result<Vec<Recipe>, AppError> {
         self.repo.find_all().await
+    }
+
+    async fn find_recipe_by_uuid(&self, uuid: Uuid) -> Result<Recipe, AppError> {
+        self.repo.find_by_uuid(uuid).await
     }
 
     async fn create_recipe(&self, data: CreateRecipe) -> Result<Recipe, AppError> {

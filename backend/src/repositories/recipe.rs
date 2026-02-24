@@ -25,6 +25,7 @@ impl Into<RecipeIngredient> for RecipeIngredientDTO {
 pub trait RecipeRepository: Send + Sync {
     async fn create(&self, data: CreateRecipe) -> Result<Recipe, AppError>;
     async fn find_all(&self) -> Result<Vec<Recipe>, AppError>;
+    async fn find_by_uuid(&self, uuid: Uuid) -> Result<Recipe, AppError>;
 }
 
 pub struct ImplRecipeRepository {
@@ -87,6 +88,25 @@ impl RecipeRepository for ImplRecipeRepository {
         }
 
         Ok(recipes)
+    }
+
+    async fn find_by_uuid(&self, uuid: Uuid) -> Result<Recipe, AppError> {
+        let mut recipe = sqlx::query_as::<_, Recipe>(
+            "SELECT uuid, name, description FROM recipes WHERE uuid = ?;",
+        )
+        .bind(uuid)
+        .fetch_one(&*self.pool)
+        .await?;
+
+        let ingredients_dto = sqlx::query_as::<_, RecipeIngredientDTO>(
+            "SELECT uuid_ingredient, amount FROM recipes_ingredients;",
+        )
+        .fetch_all(&*self.pool)
+        .await?;
+
+        recipe.ingredients = ingredients_dto.iter().map(|v| v.clone().into()).collect();
+
+        Ok(recipe)
     }
 }
 

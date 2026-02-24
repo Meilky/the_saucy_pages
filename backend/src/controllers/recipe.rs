@@ -1,6 +1,10 @@
 use std::sync::Arc;
 
-use axum::{Json, extract::State};
+use axum::{
+    Json,
+    extract::{Path, State},
+};
+use uuid::Uuid;
 
 use crate::{
     api::HttpAppState,
@@ -15,6 +19,15 @@ pub async fn get_recipes(
     let recipes = app_state.recipe_service.list_recipes().await?;
 
     Ok(Json(recipes))
+}
+
+pub async fn get_recipe_by_uuid(
+    Path(uuid): Path<Uuid>,
+    State(app_state): State<Arc<HttpAppState>>,
+) -> Result<Json<Recipe>, AppError> {
+    let recipe = app_state.recipe_service.find_recipe_by_uuid(uuid).await?;
+
+    Ok(Json(recipe))
 }
 
 pub async fn post_recipe(
