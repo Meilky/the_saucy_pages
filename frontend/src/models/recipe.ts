@@ -1,7 +1,7 @@
 export type RecipeIngredient = {
 	uuid: string;
 	amount: number;
-}
+};
 
 export type Recipe = {
 	uuid: string;
