@@ -53,7 +53,7 @@ impl IngredientRepository for ImplIngredientRepository {
 
     async fn find_for_recipe(&self, recipe: &Recipe) -> Result<Vec<Ingredient>, AppError> {
         sqlx::query_as::<_, Ingredient>("SELECT uuid, name, description FROM ingredients WHERE uuid IN (SELECT uuid_ingredient FROM recipes_ingredients WHERE uuid_recipe = ?);")
-            .bind(&recipe.uuid)
+            .bind(recipe.uuid)
             .fetch_all(&*self.pool)
             .await
             .map_err(|_e| AppError::InternalServerError)

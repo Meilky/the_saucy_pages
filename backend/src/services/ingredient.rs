@@ -23,10 +23,10 @@ impl<Repo: IngredientRepository> IngredientService for ImplIngredientService<Rep
     }
 
     async fn create_ingredient(&self, data: CreateIngredient) -> Result<Ingredient, AppError> {
-        if data.name.len() == 0 {
+        if data.name.is_empty() {
             return Err(IngredientError::NameTooShort.into());
         } else if let Some(description) = data.description.clone()
-            && description.len() == 0
+            && description.is_empty()
         {
             return Err(IngredientError::DescriptionTooShort.into());
         }

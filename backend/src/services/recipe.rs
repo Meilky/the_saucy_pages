@@ -30,9 +30,9 @@ impl<Repo: RecipeRepository> RecipeService for ImplRecipeService<Repo> {
     }
 
     async fn create_recipe(&self, data: CreateRecipe) -> Result<Recipe, AppError> {
-        if data.name.len() == 0 {
+        if data.name.is_empty() {
             return Err(RecipeError::NameTooShort.into());
-        } else if data.description.len() == 0 {
+        } else if data.description.is_empty() {
             return Err(RecipeError::DescriptionTooShort.into());
         }
 

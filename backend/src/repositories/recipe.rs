@@ -13,11 +13,11 @@ struct RecipeIngredientDTO {
     pub amount: f32,
 }
 
-impl Into<RecipeIngredient> for RecipeIngredientDTO {
-    fn into(self) -> RecipeIngredient {
+impl From<RecipeIngredientDTO> for RecipeIngredient {
+    fn from(val: RecipeIngredientDTO) -> Self {
         RecipeIngredient {
-            uuid: self.uuid_ingredient,
-            amount: self.amount,
+            uuid: val.uuid_ingredient,
+            amount: val.amount,
         }
     }
 }
@@ -48,7 +48,7 @@ impl RecipeRepository for ImplRecipeRepository {
             VALUES (?, ?, ?);
             "#,
         )
-        .bind(recipe.uuid.clone())
+        .bind(recipe.uuid)
         .bind(recipe.name.clone())
         .bind(recipe.description.clone())
         .execute(&*self.pool)
@@ -61,9 +61,9 @@ impl RecipeRepository for ImplRecipeRepository {
                 VALUES (?, ?, ?);
                 "#,
             )
-            .bind(recipe.uuid.clone())
-            .bind(ingredient.uuid.clone())
-            .bind(ingredient.amount.clone())
+            .bind(recipe.uuid)
+            .bind(ingredient.uuid)
+            .bind(ingredient.amount)
             .execute(&*self.pool)
             .await?;
         }
