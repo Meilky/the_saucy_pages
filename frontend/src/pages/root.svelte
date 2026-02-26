@@ -4,7 +4,7 @@
 
 	import IngredientsPage from "./ingredients.svelte";
 	import NewIngredientPage from "./new-ingredient.svelte";
-    import RecipeDetailsPage from "./recipe-details.svelte";
+	import RecipeDetailsPage from "./recipe-details.svelte";
 
 	import NotFound from "./404.svelte";
 
@@ -23,9 +23,12 @@
 		CurrentPage = NewRecipePage;
 	});
 
-	router.addRoute(/^\/recipes\/[0-9a-f]{8}(?:\-[0-9a-f]{4}){3}-[0-9a-f]{12}\/?$/, () => {
-		CurrentPage = RecipeDetailsPage;
-	});
+	router.addRoute(
+		/^\/recipes\/[0-9a-f]{8}(?:\-[0-9a-f]{4}){3}-[0-9a-f]{12}\/?$/,
+		() => {
+			CurrentPage = RecipeDetailsPage;
+		},
+	);
 
 	router.addRoute(/^\/ingredients\/?$/, () => {
 		CurrentPage = IngredientsPage;
@@ -70,27 +73,37 @@
 	});
 </script>
 
-<nav>
-	<span>The saucy pages</span>
-	<a href="/recipes">Recipes</a>
-	<a href="/ingredients">Ingredients</a>
-</nav>
-
-<CurrentPage />
+<div id="app-container">
+	<div id="navbar">
+		<span id="title">The saucy pages</span>
+		<a href="/recipes">Recipes</a>
+		<a href="/ingredients">Ingredients</a>
+	</div>
+	<div id="page">
+		<CurrentPage />
+	</div>
+</div>
 
 <style>
-	span {
+	#title {
 		font-weight: bold;
-		font-size: 1.5em;
 	}
 
-	nav {
+	#app-container {
+		display: grid;
+		grid-template-columns: 10vw auto;
+		height: 100vh;
+	}
+
+	#navbar {
 		display: flex;
-		width: 100%;
-		padding: 5px;
-		margin-bottom: 5px;
-		border-bottom: 1px black solid;
-		align-items: center;
-		column-gap: 10px;
+		flex-direction: column;
+		padding: 1em;
+		border-right: 1px darkgray solid;
+		background-color: lightgray;
+	}
+
+	#page {
+		background-color: whitesmoke;
 	}
 </style>

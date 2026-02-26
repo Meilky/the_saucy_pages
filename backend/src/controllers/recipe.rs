@@ -9,7 +9,10 @@ use uuid::Uuid;
 use crate::{
     api::HttpAppState,
     error::AppError,
-    models::recipe::{CreateRecipe, Recipe},
+    models::{
+        ingredient::Ingredient,
+        recipe::{CreateRecipe, Recipe},
+    },
     services::recipe::RecipeService,
 };
 
@@ -28,6 +31,18 @@ pub async fn get_recipe_by_uuid(
     let recipe = app_state.recipe_service.find_recipe_by_uuid(uuid).await?;
 
     Ok(Json(recipe))
+}
+
+pub async fn get_ingredients_for_recipe_by_uuid(
+    Path(uuid): Path<Uuid>,
+    State(app_state): State<Arc<HttpAppState>>,
+) -> Result<Json<Vec<Ingredient>>, AppError> {
+    let ingredients = app_state
+        .recipe_service
+        .list_ingredients_for_recipe_by_uuid(uuid)
+        .await?;
+
+    Ok(Json(ingredients))
 }
 
 pub async fn post_recipe(

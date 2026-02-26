@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::error::{AppError, IngredientError};
 use crate::models::ingredient::{CreateIngredient, Ingredient};
 use crate::repositories::ingredient::IngredientRepository;
@@ -7,19 +9,19 @@ pub trait IngredientService: Send + Sync {
     async fn create_ingredient(&self, data: CreateIngredient) -> Result<Ingredient, AppError>;
 }
 
-pub struct ImplIngredientService<Repo: IngredientRepository> {
-    repo: Repo,
+pub struct ImplIngredientService<IR: IngredientRepository> {
+    ingredient_repo: Arc<IR>,
 }
 
-impl<Repo: IngredientRepository> ImplIngredientService<Repo> {
-    pub fn new(repo: Repo) -> Self {
-        Self { repo }
+impl<IR: IngredientRepository> ImplIngredientService<IR> {
+    pub fn new(ingredient_repo: Arc<IR>) -> Self {
+        Self { ingredient_repo }
     }
 }
 
 impl<Repo: IngredientRepository> IngredientService for ImplIngredientService<Repo> {
     async fn list_ingredients(&self) -> Result<Vec<Ingredient>, AppError> {
-        self.repo.find_all().await
+        self.ingredient_repo.find_all().await
     }
 
     async fn create_ingredient(&self, data: CreateIngredient) -> Result<Ingredient, AppError> {
@@ -31,6 +33,6 @@ impl<Repo: IngredientRepository> IngredientService for ImplIngredientService<Rep
             return Err(IngredientError::DescriptionTooShort.into());
         }
 
-        self.repo.create(data).await
+        self.ingredient_repo.create(data).await
     }
 }

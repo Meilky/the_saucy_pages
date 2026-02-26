@@ -9,7 +9,7 @@ use crate::services::ingredient::ImplIngredientService;
 use crate::services::recipe::ImplRecipeService;
 
 pub struct HttpAppState {
-    pub recipe_service: ImplRecipeService<ImplRecipeRepository>,
+    pub recipe_service: ImplRecipeService<ImplRecipeRepository, ImplIngredientRepository>,
     pub ingredient_service: ImplIngredientService<ImplIngredientRepository>,
 }
 
@@ -20,6 +20,10 @@ pub fn get_api(shared_state: Arc<HttpAppState>) -> Router {
             get(recipe::get_recipes).post(recipe::post_recipe),
         )
         .route("/api/recipes/{uuid}", get(recipe::get_recipe_by_uuid))
+        .route(
+            "/api/recipes/{uuid}/ingredients",
+            get(recipe::get_ingredients_for_recipe_by_uuid),
+        )
         .route(
             "/api/ingredients",
             get(ingredient::get_ingredients).post(ingredient::post_ingredient),

@@ -12,6 +12,18 @@ export async function getIngredients(): Promise<Ingredient[]> {
 	return data;
 }
 
+export async function getIngredientsForRecipe(uuid: string): Promise<Ingredient[]> {
+	const response = await fetch(`/api/recipes/${uuid}/ingredients`);
+
+	if (!response.ok) {
+		throw new Error(response.statusText);
+	}
+
+	const data: Ingredient[] = await response.json();
+
+	return data;
+}
+
 export async function createIngredient(ingredientToCreate: CreateIngredient): Promise<Ingredient> {
 	const response = await fetch("/api/ingredients", {
 		method: "POST",

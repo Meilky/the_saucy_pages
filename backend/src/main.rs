@@ -61,11 +61,11 @@ async fn main() {
 
     let arc_pool = Arc::new(sqlite_pool);
 
-    let ingredient_repository = ImplIngredientRepository::new(Arc::clone(&arc_pool));
-    let recipe_repository = ImplRecipeRepository::new(Arc::clone(&arc_pool));
+    let ingredient_repository = Arc::new(ImplIngredientRepository::new(Arc::clone(&arc_pool)));
+    let recipe_repository = Arc::new(ImplRecipeRepository::new(Arc::clone(&arc_pool)));
 
-    let ingredient_service = ImplIngredientService::new(ingredient_repository);
-    let recipe_service = ImplRecipeService::new(recipe_repository);
+    let ingredient_service = ImplIngredientService::new(ingredient_repository.clone());
+    let recipe_service = ImplRecipeService::new(recipe_repository, ingredient_repository);
 
     let app_state = Arc::new(HttpAppState {
         recipe_service,

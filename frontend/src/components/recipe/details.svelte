@@ -1,17 +1,25 @@
 <script lang="ts">
+	import type { Ingredient } from "../../models/ingredient";
 	import type { Recipe } from "../../models/recipe";
 
 	interface Props {
 		recipe: Recipe;
+		ingredients: Ingredient[];
 	}
 
-	const { recipe }: Props = $props();
+	const { recipe, ingredients }: Props = $props();
+
+	const mapIngredients = new Map<string, Ingredient>(
+		ingredients.map((v) => [v.uuid, v]),
+	);
 </script>
 
 <h1>{recipe.name}</h1>
 <ul>
 	{#each recipe.ingredients as ingredient}
-		<li>{ingredient.amount} - {ingredient.uuid}</li>
+		<li>
+			{ingredient.amount} - {mapIngredients.get(ingredient.uuid)!.name}
+		</li>
 	{/each}
 </ul>
 <ol>
