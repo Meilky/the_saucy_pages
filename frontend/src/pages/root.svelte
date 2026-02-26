@@ -70,9 +70,27 @@
 	});
 </script>
 
-<a href="/recipes">Recipes</a>
-<a href="/recipes/new">New recipe</a>
-<a href="/ingredients">Ingredients</a>
-<a href="/ingredients/new">New ingredient</a>
+<nav>
+	<span>The saucy pages</span>
+	<a href="/recipes">Recipes</a>
+	<a href="/ingredients">Ingredients</a>
+</nav>
 
 <CurrentPage />
+
+<style>
+	span {
+		font-weight: bold;
+		font-size: 1.5em;
+	}
+
+	nav {
+		display: flex;
+		width: 100%;
+		padding: 5px;
+		margin-bottom: 5px;
+		border-bottom: 1px black solid;
+		align-items: center;
+		column-gap: 10px;
+	}
+</style>

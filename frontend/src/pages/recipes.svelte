@@ -8,6 +8,8 @@
 {#await data}
 	<p>waiting for the promise to resolve...</p>
 {:then recipes}
+	<a href="/recipes/new">New</a>
+
 	<RecipesTable {recipes} />
 {:catch error}
 	<p>Something went wrong: {error.message}</p>

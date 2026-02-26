@@ -22,6 +22,7 @@
 		name = "";
 		description = "";
 		ingredients = [];
+		instructions = [];
 	}
 
 	async function submit() {
