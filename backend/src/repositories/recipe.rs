@@ -111,16 +111,18 @@ impl RecipeRepository for ImplRecipeRepository {
 
         for recipe in recipes.iter_mut() {
             let ingredients_dto = sqlx::query_as::<_, RecipeIngredientDTO>(
-                "SELECT uuid_ingredient, amount FROM recipes_ingredients;",
+                "SELECT uuid_ingredient, amount FROM recipes_ingredients WHERE uuid_recipe = ?;",
             )
+            .bind(recipe.uuid)
             .fetch_all(&*self.pool)
             .await?;
 
             recipe.ingredients = ingredients_dto.iter().map(|v| v.clone().into()).collect();
 
             let instructions_dto = sqlx::query_as::<_, RecipeInstructionDTO>(
-                "SELECT uuid_instruction, step_number, description FROM recipes_instructions;",
+                "SELECT uuid_instruction, step_number, description FROM recipes_instructions WHERE uuid_recipe = ?;",
             )
+            .bind(recipe.uuid)
             .fetch_all(&*self.pool)
             .await?;
 
@@ -139,16 +141,18 @@ impl RecipeRepository for ImplRecipeRepository {
         .await?;
 
         let ingredients_dto = sqlx::query_as::<_, RecipeIngredientDTO>(
-            "SELECT uuid_ingredient, amount FROM recipes_ingredients;",
+            "SELECT uuid_ingredient, amount FROM recipes_ingredients WHERE uuid_recipe = ?;",
         )
+        .bind(uuid)
         .fetch_all(&*self.pool)
         .await?;
 
         recipe.ingredients = ingredients_dto.iter().map(|v| v.clone().into()).collect();
 
         let instructions_dto = sqlx::query_as::<_, RecipeInstructionDTO>(
-            "SELECT uuid_instruction, step_number, description FROM recipes_instructions;",
+            "SELECT uuid_instruction, step_number, description FROM recipes_instructions WHERE uuid_recipe = ?;",
         )
+        .bind(uuid)
         .fetch_all(&*self.pool)
         .await?;
 
