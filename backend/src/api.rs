@@ -19,11 +19,11 @@ pub fn get_api(shared_state: Arc<HttpAppState>) -> Router {
             "/api/recipes",
             get(recipe::get_recipes).post(recipe::post_recipe),
         )
-        .route("/api/recipes/{uuid}", get(recipe::get_recipe_by_uuid))
         .route(
             "/api/recipes/{uuid}/ingredients",
             get(recipe::get_ingredients_for_recipe_by_uuid),
         )
+        .route("/api/recipes/{uuid}", get(recipe::get_recipe_by_uuid))
         .route(
             "/api/ingredients",
             get(ingredient::get_ingredients).post(ingredient::post_ingredient),

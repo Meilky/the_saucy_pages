@@ -15,6 +15,7 @@
 </script>
 
 <h1>{recipe.name}</h1>
+<h2>Ingredients</h2>
 <ul>
 	{#each recipe.ingredients as ingredient}
 		<li>
@@ -22,10 +23,11 @@
 		</li>
 	{/each}
 </ul>
-<ol>
+<h2>Instructions</h2>
+<ol start="0">
 	{#each recipe.instructions.toSorted((a, b) => a.step_number - b.step_number) as instruction}
 		<li>
-			{instruction.step_number} - {instruction.description} - {instruction.uuid}
+			{instruction.description}
 		</li>
 	{/each}
 </ol>

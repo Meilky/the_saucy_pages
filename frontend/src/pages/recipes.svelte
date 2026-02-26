@@ -2,6 +2,7 @@
 	import IconPlus from "@lucide/svelte/icons/plus";
 
 	import RecipesTable from "../components/recipe/table.svelte";
+
 	import { getRecipes } from "../api/recipes";
 
 	let data = $state(getRecipes());
