@@ -7,6 +7,29 @@ pub struct RecipeIngredient {
     pub amount: f32,
 }
 
+#[derive(Serialize)]
+pub struct RecipeInstruction {
+    pub uuid: Uuid,
+    pub step_number: u16,
+    pub description: String,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct CreateRecipeInstruction {
+    pub step_number: u16,
+    pub description: String,
+}
+
+impl From<CreateRecipeInstruction> for RecipeInstruction {
+    fn from(value: CreateRecipeInstruction) -> Self {
+        Self {
+            uuid: Uuid::now_v7(),
+            step_number: value.step_number,
+            description: value.description,
+        }
+    }
+}
+
 #[derive(sqlx::FromRow, Serialize)]
 pub struct Recipe {
     pub uuid: Uuid,
@@ -14,6 +37,8 @@ pub struct Recipe {
     pub description: String,
     #[sqlx(skip)]
     pub ingredients: Vec<RecipeIngredient>,
+    #[sqlx(skip)]
+    pub instructions: Vec<RecipeInstruction>,
 }
 
 #[derive(Deserialize)]
@@ -21,6 +46,7 @@ pub struct CreateRecipe {
     pub name: String,
     pub description: String,
     pub ingredients: Vec<RecipeIngredient>,
+    pub instructions: Vec<CreateRecipeInstruction>,
 }
 
 impl From<CreateRecipe> for Recipe {
@@ -30,6 +56,11 @@ impl From<CreateRecipe> for Recipe {
             name: value.name,
             description: value.description,
             ingredients: value.ingredients,
+            instructions: value
+                .instructions
+                .iter()
+                .map(|v| v.clone().into())
+                .collect(),
         }
     }
 }

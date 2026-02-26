@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { createRecipe } from "$api/recipes";
-    import type { Ingredient } from "../../models/ingredient";
-	import type { RecipeIngredient } from "../../models/recipe";
+	import type { Ingredient } from "../../models/ingredient";
+	import type {
+		CreateRecipeInstruction,
+		RecipeIngredient,
+	} from "../../models/recipe";
 
 	interface Props {
 		onSubmited?: () => void;
@@ -13,6 +16,7 @@
 	let name = $state("");
 	let description = $state("");
 	let ingredients: RecipeIngredient[] = $state([]);
+	let instructions: CreateRecipeInstruction[] = $state([]);
 
 	function reset() {
 		name = "";
@@ -25,6 +29,7 @@
 			name,
 			description,
 			ingredients,
+			instructions,
 		});
 
 		reset();
@@ -51,6 +56,13 @@
 		});
 	}
 
+	function addInstruction() {
+		instructions.push({
+			step_number: instructions.length,
+			description: "",
+		});
+	}
+
 	function removeIngredient(uuid: string) {
 		const idx = ingredients.findIndex((v) => v.uuid === uuid);
 
@@ -59,16 +71,49 @@
 		ingredients.splice(idx, 1);
 	}
 
-	function createRemoveRecipeCallback(uuid: string) {
+	function removeInstruction(step_number: number) {
+		const idx = instructions.findIndex(
+			(v) => v.step_number === step_number,
+		);
+
+		if (idx === -1) return;
+
+		ingredients.splice(idx, 1);
+	}
+
+	function createRemoveIngredientCallback(uuid: string) {
 		return () => {
 			return removeIngredient(uuid);
 		};
 	}
 
-	function createEditRecipeCallback(uuid: string) {
+	function createRemoveInstructionCallback(step_number: number) {
 		return () => {
-			console.log(`Edit: ${uuid}`);
+			return removeInstruction(step_number);
 		};
+	}
+
+	function onStepChanged(
+		instruction: CreateRecipeInstruction,
+		step_number: number,
+	) {
+		// decrement
+		if (instruction.step_number > step_number) {
+			for (let i = step_number; i < instruction.step_number; i++) {
+				let ins = instructions.find((v) => v.step_number === i);
+				ins!.step_number++;
+			}
+		}
+
+		// increment
+		if (instruction.step_number < step_number) {
+			for (let i = step_number; i > instruction.step_number; i--) {
+				let ins = instructions.find((v) => v.step_number === i);
+				ins!.step_number++;
+			}
+		}
+
+		instruction.step_number = step_number;
 	}
 
 	const datalistId = $props.id();
@@ -101,24 +146,71 @@
 			<tbody>
 				{#each ingredients as ingredient}
 					<tr>
-						<td><input list={datalistId} bind:value={ingredient.uuid}></td>
-						<td><input type="number" min="0" step="0.1" bind:value={ingredient.amount}></td>
+						<td
+							><input
+								list={datalistId}
+								bind:value={ingredient.uuid}
+							/></td
+						>
+						<td
+							><input
+								type="number"
+								min="0"
+								step="0.1"
+								bind:value={ingredient.amount}
+							/></td
+						>
 						<td>
 							<button
 								type="button"
-								onclick={createRemoveRecipeCallback(
+								onclick={createRemoveIngredientCallback(
 									ingredient.uuid,
 								)}
 							>
 								Remove
 							</button>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<table>
+			<thead>
+				<tr>
+					<th>Instructions (Step number)</th>
+					<th>Description</th>
+					<th>
+						<button type="button" onclick={addInstruction}>
+							Add
+						</button>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each instructions.toSorted((a, b) => a.step_number - b.step_number) as instruction}
+					<tr>
+						<td
+							><input
+								type="number"
+								min="0"
+								max={instructions.length - 1}
+								step="1"
+								bind:value={
+									() => instruction.step_number,
+									(step_number) =>
+										onStepChanged(instruction, step_number)
+								}
+							/></td
+						>
+						<td><input bind:value={instruction.description} /></td>
+						<td>
 							<button
 								type="button"
-								onclick={createEditRecipeCallback(
-									ingredient.uuid,
+								onclick={createRemoveInstructionCallback(
+									instruction.step_number,
 								)}
 							>
-								Edit
+								Remove
 							</button>
 						</td>
 					</tr>

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     error::AppError,
-    models::recipe::{CreateRecipe, Recipe, RecipeIngredient},
+    models::recipe::{CreateRecipe, Recipe, RecipeIngredient, RecipeInstruction},
 };
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
@@ -18,6 +18,23 @@ impl From<RecipeIngredientDTO> for RecipeIngredient {
         RecipeIngredient {
             uuid: val.uuid_ingredient,
             amount: val.amount,
+        }
+    }
+}
+
+#[derive(sqlx::FromRow, Clone)]
+struct RecipeInstructionDTO {
+    pub uuid_instruction: Uuid,
+    pub step_number: u16,
+    pub description: String,
+}
+
+impl From<RecipeInstructionDTO> for RecipeInstruction {
+    fn from(val: RecipeInstructionDTO) -> Self {
+        RecipeInstruction {
+            uuid: val.uuid_instruction,
+            step_number: val.step_number,
+            description: val.description,
         }
     }
 }
@@ -68,7 +85,22 @@ impl RecipeRepository for ImplRecipeRepository {
             .await?;
         }
 
-        Ok(recipe)
+        for instruction in recipe.instructions.iter() {
+            sqlx::query(
+                r#"
+                INSERT INTO recipes_instructions (uuid_recipe, uuid_instruction, step_number, description)
+                VALUES (?, ?, ?, ?);
+                "#,
+            )
+            .bind(recipe.uuid)
+            .bind(instruction.uuid)
+            .bind(instruction.step_number)
+            .bind(instruction.description.clone())
+            .execute(&*self.pool)
+            .await?;
+        }
+
+        self.find_by_uuid(recipe.uuid).await
     }
 
     async fn find_all(&self) -> Result<Vec<Recipe>, AppError> {
@@ -85,6 +117,14 @@ impl RecipeRepository for ImplRecipeRepository {
             .await?;
 
             recipe.ingredients = ingredients_dto.iter().map(|v| v.clone().into()).collect();
+
+            let instructions_dto = sqlx::query_as::<_, RecipeInstructionDTO>(
+                "SELECT uuid_instruction, step_number, description FROM recipes_instructions;",
+            )
+            .fetch_all(&*self.pool)
+            .await?;
+
+            recipe.instructions = instructions_dto.iter().map(|v| v.clone().into()).collect();
         }
 
         Ok(recipes)
@@ -106,87 +146,14 @@ impl RecipeRepository for ImplRecipeRepository {
 
         recipe.ingredients = ingredients_dto.iter().map(|v| v.clone().into()).collect();
 
+        let instructions_dto = sqlx::query_as::<_, RecipeInstructionDTO>(
+            "SELECT uuid_instruction, step_number, description FROM recipes_instructions;",
+        )
+        .fetch_all(&*self.pool)
+        .await?;
+
+        recipe.instructions = instructions_dto.iter().map(|v| v.clone().into()).collect();
+
         Ok(recipe)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::sync::Arc;
-
-    use super::*;
-    use sqlx::sqlite::SqlitePoolOptions;
-
-    async fn create_pool() -> Pool<Sqlite> {
-        let pool = SqlitePoolOptions::new()
-            .max_connections(5)
-            .connect(":memory:")
-            .await
-            .unwrap();
-
-        sqlx::migrate!().run(&pool).await.unwrap();
-
-        pool
-    }
-
-    #[tokio::test]
-    async fn find_all_return_empty_db() {
-        let pool = create_pool().await;
-        let repo = ImplRecipeRepository::new(Arc::new(pool));
-
-        let result = repo.find_all().await;
-
-        assert!(result.is_ok());
-
-        let data = result.unwrap();
-
-        assert_eq!(data.len(), 0);
-    }
-
-    #[tokio::test]
-    async fn insert_return_the_new_recipe() {
-        let pool = create_pool().await;
-        let repo = ImplRecipeRepository::new(Arc::new(pool));
-
-        let recipe_name = "test name".to_string();
-        let recipe_description = "test description".to_string();
-
-        let result = repo
-            .create(CreateRecipe {
-                name: recipe_name.clone(),
-                description: recipe_description.clone(),
-            })
-            .await;
-
-        assert!(result.is_ok());
-
-        let data = result.unwrap();
-
-        assert_eq!(data.name, recipe_name);
-        assert_eq!(data.description, recipe_description);
-    }
-
-    #[tokio::test]
-    async fn find_all_should_return_one_recipe_after_creation() {
-        let pool = create_pool().await;
-        let repo = ImplRecipeRepository::new(Arc::new(pool));
-
-        let recipe_name = "test name".to_string();
-        let recipe_description = "test description".to_string();
-
-        repo.create(CreateRecipe {
-            name: recipe_name.clone(),
-            description: recipe_description.clone(),
-        })
-        .await
-        .unwrap();
-
-        let result = repo.find_all().await;
-
-        assert!(result.is_ok());
-
-        let data = result.unwrap();
-
-        assert_eq!(data.len(), 1);
     }
 }

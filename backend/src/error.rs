@@ -14,6 +14,8 @@ pub enum RecipeError {
     NameAlreadyUsed,
     DescriptionTooShort,
     DescriptionTooLong,
+    NotEnoughtIngredients,
+    NotEnoughtInstructions,
 }
 
 #[derive(Debug)]
