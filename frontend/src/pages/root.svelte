@@ -1,4 +1,6 @@
 <script lang="ts">
+	import DashboardPage from "./dashboard.svelte";
+
 	import RecipesPage from "./recipes.svelte";
 	import NewRecipePage from "./new-recipe.svelte";
 
@@ -14,6 +16,10 @@
 	let CurrentPage: Component = $state(NotFound);
 
 	const router = new Router();
+
+	router.addRoute(/^\/dashboard\/?$/, () => {
+		CurrentPage = DashboardPage;
+	});
 
 	router.addRoute(/^\/recipes\/?$/, () => {
 		CurrentPage = RecipesPage;
@@ -62,7 +68,7 @@
 		const handler = router.getHandlerByMatch(pathname);
 
 		if (pathname == "/") {
-			navigation.navigate("/recipes");
+			navigation.navigate("/dashboard");
 		} else if (handler) {
 			handler();
 		}
@@ -76,6 +82,7 @@
 <div id="app-container">
 	<div id="navbar">
 		<span id="title">The saucy pages</span>
+		<a href="/dashboard">Dashboard</a>
 		<a href="/recipes">Recipes</a>
 		<a href="/ingredients">Ingredients</a>
 	</div>
