@@ -3,7 +3,6 @@ use std::sync::Arc;
 use dotenv::dotenv;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use iced::widget::{Column, button, column, text};
 
 use crate::{
     repositories::{ingredient::ImplIngredientRepository, recipe::ImplRecipeRepository},
