@@ -1,4 +1,7 @@
-use iced::{Element, widget::{button, column, text}};
+use iced::{
+    Element,
+    widget::{button, column, text},
+};
 
 pub struct Recipes {
     value: i32,
@@ -20,7 +23,8 @@ impl Recipes {
             button("+ r").on_press(Message::Increment),
             text(self.value).size(50),
             button("- r").on_press(Message::Decrement),
-        ].into()
+        ]
+        .into()
     }
 
     pub fn update(&mut self, message: Message) {

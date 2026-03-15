@@ -10,7 +10,8 @@ use crate::{
     services::{
         ingredient::{ImplIngredientService, IngredientService},
         recipe::{ImplRecipeService, RecipeService},
-    }, views::app::App,
+    },
+    views::app::App,
 };
 
 mod error;

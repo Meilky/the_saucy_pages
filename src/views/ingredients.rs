@@ -1,4 +1,7 @@
-use iced::{Element, widget::{button, column, text}};
+use iced::{
+    Element,
+    widget::{button, column, text},
+};
 
 pub struct Ingrendients {
     value: i32,
@@ -20,7 +23,8 @@ impl Ingrendients {
             button("+ i").on_press(Message::Increment),
             text(self.value).size(50),
             button("- i").on_press(Message::Decrement),
-        ].into()
+        ]
+        .into()
     }
 
     pub fn update(&mut self, message: Message) {
