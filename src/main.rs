@@ -3,51 +3,60 @@ use std::sync::Arc;
 use dotenv::dotenv;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use tokio::signal;
+use iced::widget::{Column, button, column, text};
 
 use crate::{
-    api::HttpAppState,
     repositories::{ingredient::ImplIngredientRepository, recipe::ImplRecipeRepository},
-    services::{ingredient::ImplIngredientService, recipe::ImplRecipeService},
+    services::{
+        ingredient::{ImplIngredientService, IngredientService},
+        recipe::{ImplRecipeService, RecipeService},
+    },
 };
 
-mod api;
-mod controllers;
 mod error;
 mod models;
 mod repositories;
 mod services;
 
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
+#[derive(Default)]
+struct Counter {
+    value: i32,
+}
 
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
+#[derive(Debug, Clone, Copy)]
+pub enum Message {
+    Increment,
+    Decrement,
+}
 
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
+impl Counter {
+    pub fn view(&self) -> Column<'_, Message> {
+        // We use a column: a simple vertical layout
+        column![
+            // The increment button. We tell it to produce an
+            // `Increment` message when pressed
+            button("+").on_press(Message::Increment),
+            // We show the value of the counter here
+            text(self.value).size(50),
+            // The decrement button. We tell it to produce a
+            // `Decrement` message when pressed
+            button("-").on_press(Message::Decrement),
+        ]
+    }
 
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
+    pub fn update(&mut self, message: Message) {
+        match message {
+            Message::Increment => {
+                self.value += 1;
+            }
+            Message::Decrement => {
+                self.value -= 1;
+            }
+        }
     }
 }
 
-#[tokio::main]
-async fn main() {
-    dotenv().ok();
-
-    tracing_subscriber::fmt::init();
-
+async fn init() -> (impl RecipeService, impl IngredientService) {
     let database_url =
         std::env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env or shell");
 
@@ -67,19 +76,13 @@ async fn main() {
     let ingredient_service = ImplIngredientService::new(ingredient_repository.clone());
     let recipe_service = ImplRecipeService::new(recipe_repository, ingredient_repository);
 
-    let app_state = Arc::new(HttpAppState {
-        recipe_service,
-        ingredient_service,
-    });
+    (recipe_service, ingredient_service)
+}
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:5055").await.unwrap();
+fn main() -> iced::Result {
+    dotenv().ok();
 
-    tracing::debug!("listening on {}", listener.local_addr().unwrap());
+    tracing_subscriber::fmt::init();
 
-    axum::serve(listener, api::get_api(app_state))
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .unwrap();
-
-    arc_pool.close().await;
+    iced::run(Counter::update, Counter::view)
 }

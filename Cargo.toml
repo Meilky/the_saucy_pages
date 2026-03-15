@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-axum = "0.8.8"
 dotenv = "0.15.0"
+iced = { version = "0.14.0", features = ["tokio"] }
 serde = { version = "1.0.228", features = ["derive"] }
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "sqlite", "uuid", "derive", "migrate"] }
 tokio = { version = "1.49.0", features = ["full"] }
