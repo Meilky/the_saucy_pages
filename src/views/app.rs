@@ -1,19 +1,10 @@
-use std::sync::Arc;
-
 use iced::{
     Element, Task,
     widget::{self, button, column},
 };
 
-use crate::{
-    init,
-    services::{
-        ingredient::ImplIngredientService, ingredient::IngredientService,
-        recipe::ImplRecipeService, recipe::RecipeService,
-    },
-    views::ingredients,
-};
-use crate::{repositories::recipe, views::recipes};
+use crate::views::recipes;
+use crate::{init, services::recipe, views::ingredients};
 
 enum Screen {
     Recipes(recipes::Recipes),
@@ -30,8 +21,8 @@ pub struct App {
 pub enum Message {
     Booted((init::RecipeService, init::IngredientService)),
     ChangeScreen,
-    CounterA(recipes::Message),
-    CounterB(ingredients::Message),
+    RecipesMSG(recipes::Message),
+    IngredientsMSG(ingredients::Message),
 }
 
 impl App {
@@ -48,13 +39,13 @@ impl App {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::CounterA(message) => {
+            Message::RecipesMSG(message) => {
                 if let Some(Screen::Recipes(recipes)) = &mut self.current_screen {
                     recipes.update(message);
                 }
                 Task::none()
             }
-            Message::CounterB(message) => {
+            Message::IngredientsMSG(message) => {
                 if let Some(Screen::Ingrendients(ingredients)) = &mut self.current_screen {
                     ingredients.update(message);
                 }
@@ -62,11 +53,14 @@ impl App {
                 Task::none()
             }
             Message::ChangeScreen => match &self.current_screen {
-
                 Some(Screen::Ingrendients(_ingredients)) => {
-                    self.current_screen = Some(Screen::Recipes(recipes::Recipes::new()));
+                    let recipe_service = self.recipe_service.clone().unwrap();
 
-                    Task::none()
+                    let (recipes, t) = recipes::Recipes::boot(recipe_service);
+
+                    self.current_screen = Some(Screen::Recipes(recipes));
+
+                    t.map(Message::RecipesMSG)
                 }
                 Some(Screen::Recipes(_recipes)) => {
                     self.current_screen =
@@ -77,11 +71,14 @@ impl App {
                 None => Task::none(),
             },
             Message::Booted((recipe_service, ingredient_service)) => {
-                self.recipe_service = Some(recipe_service);
+                self.recipe_service = Some(recipe_service.clone());
                 self.ingredient_service = Some(ingredient_service);
-                self.current_screen = Some(Screen::Recipes(recipes::Recipes::new()));
 
-                Task::none()
+                let (recipes, t) = recipes::Recipes::boot(recipe_service);
+
+                self.current_screen = Some(Screen::Recipes(recipes));
+
+                t.map(Message::RecipesMSG)
             }
         }
     }
@@ -91,8 +88,8 @@ impl App {
             button("Change").on_press(Message::ChangeScreen),
             match &self.current_screen {
                 Some(Screen::Ingrendients(ingredients)) =>
-                    ingredients.view().map(Message::CounterB),
-                Some(Screen::Recipes(recipes)) => recipes.view().map(Message::CounterA),
+                    ingredients.view().map(Message::IngredientsMSG),
+                Some(Screen::Recipes(recipes)) => recipes.view().map(Message::RecipesMSG),
                 None => widget::text!("Booting...").into(),
             }
         ]

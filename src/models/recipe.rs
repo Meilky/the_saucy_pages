@@ -1,20 +1,20 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RecipeIngredient {
     pub uuid: Uuid,
     pub amount: f32,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct RecipeInstruction {
     pub uuid: Uuid,
     pub step_number: u16,
     pub description: String,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct CreateRecipeInstruction {
     pub step_number: u16,
     pub description: String,
@@ -30,7 +30,7 @@ impl From<CreateRecipeInstruction> for RecipeInstruction {
     }
 }
 
-#[derive(sqlx::FromRow, Serialize)]
+#[derive(sqlx::FromRow, Serialize, Clone, Debug)]
 pub struct Recipe {
     pub uuid: Uuid,
     pub name: String,

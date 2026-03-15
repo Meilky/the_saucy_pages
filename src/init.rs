@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use tokio::time::{sleep, Duration};
 
-use dotenv::dotenv;
 use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
@@ -32,10 +31,6 @@ pub async fn init() -> (RecipeService, IngredientService) {
 
     let ingredient_service = ImplIngredientService::new(ingredient_repository.clone());
     let recipe_service = ImplRecipeService::new(recipe_repository, ingredient_repository);
-
-    sleep(Duration::from_millis(2000)).await;
-
-    println!("aklsdfjals jklksdf laskdf lkasd");
 
     (recipe_service, ingredient_service)
 }
