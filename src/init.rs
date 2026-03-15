@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-
 use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
