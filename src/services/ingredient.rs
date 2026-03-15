@@ -9,6 +9,7 @@ pub trait IngredientService: Send + Sync {
     async fn create_ingredient(&self, data: CreateIngredient) -> Result<Ingredient, AppError>;
 }
 
+#[derive(Debug, Clone)]
 pub struct ImplIngredientService<IR: IngredientRepository> {
     ingredient_repo: Arc<IR>,
 }

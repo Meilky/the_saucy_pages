@@ -45,17 +45,18 @@ pub trait RecipeRepository: Send + Sync {
     async fn find_by_uuid(&self, uuid: Uuid) -> Result<Recipe, AppError>;
 }
 
-pub struct ImplRecipeRepository {
+#[derive(Debug, Clone)]
+pub struct SQLiteRecipeRepository {
     pool: Arc<Pool<Sqlite>>,
 }
 
-impl ImplRecipeRepository {
+impl SQLiteRecipeRepository {
     pub fn new(pool: Arc<Pool<Sqlite>>) -> Self {
         Self { pool }
     }
 }
 
-impl RecipeRepository for ImplRecipeRepository {
+impl RecipeRepository for SQLiteRecipeRepository {
     async fn create(&self, data: CreateRecipe) -> Result<Recipe, AppError> {
         let recipe: Recipe = data.into();
 

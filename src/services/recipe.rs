@@ -18,6 +18,7 @@ pub trait RecipeService: Send + Sync {
     async fn create_recipe(&self, data: CreateRecipe) -> Result<Recipe, AppError>;
 }
 
+#[derive(Debug, Clone)]
 pub struct ImplRecipeService<RR: RecipeRepository, IR: IngredientRepository> {
     recipe_repo: Arc<RR>,
     ingredient_repo: Arc<IR>,

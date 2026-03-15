@@ -15,17 +15,18 @@ pub trait IngredientRepository: Send + Sync {
     async fn find_for_recipe(&self, recipe: &Recipe) -> Result<Vec<Ingredient>, AppError>;
 }
 
-pub struct ImplIngredientRepository {
+#[derive(Debug, Clone)]
+pub struct SQLiteIngredientRepository {
     pool: Arc<Pool<Sqlite>>,
 }
 
-impl ImplIngredientRepository {
+impl SQLiteIngredientRepository {
     pub fn new(pool: Arc<Pool<Sqlite>>) -> Self {
         Self { pool }
     }
 }
 
-impl IngredientRepository for ImplIngredientRepository {
+impl IngredientRepository for SQLiteIngredientRepository {
     async fn create(&self, data: CreateIngredient) -> Result<Ingredient, AppError> {
         let ingredient: Ingredient = data.into();
 
