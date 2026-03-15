@@ -1,6 +1,6 @@
 use iced::{
     Element, Task,
-    widget::{self, button, column, text},
+    widget::{column, text},
 };
 
 use crate::{init::RecipeService, models::recipe::Recipe, services::recipe::RecipeService as _};

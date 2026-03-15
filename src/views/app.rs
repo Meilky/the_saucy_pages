@@ -4,7 +4,7 @@ use iced::{
 };
 
 use crate::views::recipes;
-use crate::{init, services::recipe, views::ingredients};
+use crate::{init, views::ingredients};
 
 enum Screen {
     Recipes(recipes::Recipes),
