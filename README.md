@@ -1,26 +1,32 @@
-# The Saucy Pages
+# The Saucy Pages Backend
 
-_FYI: This doesn't work and probably never will._
+This is the backend of The saucy pages.
 
-The Saucy Pages is an app to keep your recipes - that's it. It's not better,
-and is probably a lot worse than anything else that already exists. If you want
-something that works, check out [cooklang](https://github.com/cooklang); they
-have an awesome project that literally made me want to stop this one.
+## Requirements
 
-## History
+You need to install the
+[sqlx-cli](https://github.com/launchbadge/sqlx/tree/main/sqlx-cli) to create
+and run the migrations on your database.
 
-At the beginning I just wanted to use [Typst](https://typst.app/) to create a
-nice recipe book. The only thing I can't do with Typst right now is glob-import
-all my recipes, which pushed me to build this (I could have written a Bash
-script to do so...). So when the issue ([Directory
-walking](https://github.com/typst/typst/issues/2123)) is resolved, the reason
-why this project exists will no longer be relevant.
+## Setup
 
-Then I thought that while building this, I could add features such as
-translation, search, OCR to detect recipes from scanned books, and recipe
-revision tracking. So I started working on it, created the repo, and made the
-initial commit. Everything was great until the next day - I found
-[cooklang](https://github.com/cooklang) on the internet...
+- The `.env`
 
-Now that I've concluded I can't add anything useful to the world of online
-recipes, I'm just building this for the love of the game.
+```bash
+cp .env.example .env
+```
+
+- The database
+
+```bash
+sqlx database create
+sqlx migrate run
+```
+
+## Starting
+
+```bash
+cargo run
+```
+
+By default, it runs on `http://0.0.0.0:5055`.
