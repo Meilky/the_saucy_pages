@@ -1,6 +1,4 @@
-# The Saucy Pages Backend
-
-This is the backend of The saucy pages.
+# The Saucy Pages
 
 ## Requirements
 
@@ -28,5 +26,3 @@ sqlx migrate run
 ```bash
 cargo run
 ```
-
-By default, it runs on `http://0.0.0.0:5055`.
