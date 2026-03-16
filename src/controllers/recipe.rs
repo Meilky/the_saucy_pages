@@ -33,7 +33,9 @@ impl<RR: RecipeRepository, IR: IngredientRepository> ImplRecipeController<RR, IR
     }
 }
 
-impl<RR: RecipeRepository, IR: IngredientRepository> RecipeController for ImplRecipeController<RR, IR> {
+impl<RR: RecipeRepository, IR: IngredientRepository> RecipeController
+    for ImplRecipeController<RR, IR>
+{
     async fn list_recipes(&self) -> Result<Vec<Recipe>, AppError> {
         self.recipe_repo.find_all().await
     }

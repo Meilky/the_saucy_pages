@@ -61,11 +61,11 @@ impl App {
                 Task::none()
             }
             Message::ChangeModule(module) => self.change_module(module),
-            Message::Booted((recipe_service, ingredient_service)) => {
-                self.recipe_controller = Some(recipe_service.clone());
-                self.ingredient_controller = Some(ingredient_service);
+            Message::Booted((recipe_controller, ingredient_controller)) => {
+                self.recipe_controller = Some(recipe_controller.clone());
+                self.ingredient_controller = Some(ingredient_controller);
 
-                let (recipes, t) = recipes::Recipes::boot(recipe_service);
+                let (recipes, t) = recipes::Recipes::boot(recipe_controller);
 
                 self.current_screen = Some(Screen::Recipes(recipes));
 
@@ -107,18 +107,18 @@ impl App {
 
         match module {
             Module::Recipe => {
-                let recipe_service = self.recipe_controller.clone().unwrap();
+                let recipe_controller = self.recipe_controller.clone().unwrap();
 
-                let (recipes, t) = recipes::Recipes::boot(recipe_service);
+                let (recipes, t) = recipes::Recipes::boot(recipe_controller);
 
                 self.current_screen = Some(Screen::Recipes(recipes));
 
                 t.map(Message::RecipesMSG)
             }
             Module::Ingredient => {
-                let ingredient_service = self.ingredient_controller.clone().unwrap();
+                let ingredient_controller = self.ingredient_controller.clone().unwrap();
 
-                let (ingredients, t) = ingredients::Ingredients::boot(ingredient_service);
+                let (ingredients, t) = ingredients::Ingredients::boot(ingredient_controller);
 
                 self.current_screen = Some(Screen::Ingrendients(ingredients));
 

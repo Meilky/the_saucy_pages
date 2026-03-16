@@ -7,7 +7,8 @@ use crate::{
     repositories::{ingredient::SQLiteIngredientRepository, recipe::SQLiteRecipeRepository},
 };
 
-pub type RecipeController = ImplRecipeController<SQLiteRecipeRepository, SQLiteIngredientRepository>;
+pub type RecipeController =
+    ImplRecipeController<SQLiteRecipeRepository, SQLiteIngredientRepository>;
 pub type IngredientController = ImplIngredientController<SQLiteIngredientRepository>;
 
 pub async fn init() -> (RecipeController, IngredientController) {
@@ -27,8 +28,8 @@ pub async fn init() -> (RecipeController, IngredientController) {
     let ingredient_repository = Arc::new(SQLiteIngredientRepository::new(Arc::clone(&arc_pool)));
     let recipe_repository = Arc::new(SQLiteRecipeRepository::new(Arc::clone(&arc_pool)));
 
-    let ingredient_service = ImplIngredientController::new(ingredient_repository.clone());
-    let recipe_service = ImplRecipeController::new(recipe_repository, ingredient_repository);
+    let ingredient_controller = ImplIngredientController::new(ingredient_repository.clone());
+    let recipe_controller = ImplRecipeController::new(recipe_repository, ingredient_repository);
 
-    (recipe_service, ingredient_service)
+    (recipe_controller, ingredient_controller)
 }

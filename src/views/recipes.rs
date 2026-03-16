@@ -8,7 +8,6 @@ use crate::{
 };
 
 pub struct Recipes {
-    recipe_service: RecipeController,
     recipes: Option<Vec<Recipe>>,
 }
 
@@ -18,13 +17,10 @@ pub enum Message {
 }
 
 impl Recipes {
-    pub fn boot(recipe_service: RecipeController) -> (Self, Task<Message>) {
+    pub fn boot(recipe_controller: RecipeController) -> (Self, Task<Message>) {
         (
-            Self {
-                recipe_service: recipe_service.clone(),
-                recipes: None,
-            },
-            Task::perform(Recipes::load(recipe_service), Message::Update),
+            Self { recipes: None },
+            Task::perform(Recipes::load(recipe_controller), Message::Update),
         )
     }
 
