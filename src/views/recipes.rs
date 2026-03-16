@@ -3,10 +3,12 @@ use iced::{
     widget::{column, text},
 };
 
-use crate::{init::RecipeService, models::recipe::Recipe, services::recipe::RecipeService as _};
+use crate::{
+    controllers::recipe::RecipeService as _, init::RecipeController, models::recipe::Recipe,
+};
 
 pub struct Recipes {
-    recipe_service: RecipeService,
+    recipe_service: RecipeController,
     recipes: Option<Vec<Recipe>>,
 }
 
@@ -16,7 +18,7 @@ pub enum Message {
 }
 
 impl Recipes {
-    pub fn boot(recipe_service: RecipeService) -> (Self, Task<Message>) {
+    pub fn boot(recipe_service: RecipeController) -> (Self, Task<Message>) {
         (
             Self {
                 recipe_service: recipe_service.clone(),
@@ -26,8 +28,8 @@ impl Recipes {
         )
     }
 
-    pub async fn load(recipe_service: RecipeService) -> Vec<Recipe> {
-        recipe_service.list_recipes().await.unwrap()
+    pub async fn load(recipe_controller: RecipeController) -> Vec<Recipe> {
+        recipe_controller.list_recipes().await.unwrap()
     }
 
     pub fn view(&self) -> Element<'_, Message> {

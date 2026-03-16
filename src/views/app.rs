@@ -1,6 +1,6 @@
 use iced::{
     Element, Task,
-    widget::{self, button, column},
+    widget::{self, button, column, row},
 };
 
 use crate::views::recipes;
@@ -8,19 +8,26 @@ use crate::{init, views::ingredients};
 
 enum Screen {
     Recipes(recipes::Recipes),
-    Ingrendients(ingredients::Ingrendients),
+    Ingrendients(ingredients::Ingredients),
 }
 
 pub struct App {
     current_screen: Option<Screen>,
-    recipe_service: Option<init::RecipeService>,
-    ingredient_service: Option<init::IngredientService>,
+    recipe_controller: Option<init::RecipeController>,
+    ingredient_controller: Option<init::IngredientController>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum Module {
+    Recipe,
+    Ingredient,
+    System,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Booted((init::RecipeService, init::IngredientService)),
-    ChangeScreen,
+    Booted((init::RecipeController, init::IngredientController)),
+    ChangeModule(Module),
     RecipesMSG(recipes::Message),
     IngredientsMSG(ingredients::Message),
 }
@@ -30,8 +37,8 @@ impl App {
         (
             Self {
                 current_screen: None,
-                recipe_service: None,
-                ingredient_service: None,
+                recipe_controller: None,
+                ingredient_controller: None,
             },
             iced::Task::perform(init::init(), Message::Booted),
         )
@@ -41,38 +48,22 @@ impl App {
         match message {
             Message::RecipesMSG(message) => {
                 if let Some(Screen::Recipes(recipes)) = &mut self.current_screen {
-                    recipes.update(message);
+                    recipes.update(message)
                 }
+
                 Task::none()
             }
             Message::IngredientsMSG(message) => {
                 if let Some(Screen::Ingrendients(ingredients)) = &mut self.current_screen {
-                    ingredients.update(message);
+                    ingredients.update(message)
                 }
 
                 Task::none()
             }
-            Message::ChangeScreen => match &self.current_screen {
-                Some(Screen::Ingrendients(_ingredients)) => {
-                    let recipe_service = self.recipe_service.clone().unwrap();
-
-                    let (recipes, t) = recipes::Recipes::boot(recipe_service);
-
-                    self.current_screen = Some(Screen::Recipes(recipes));
-
-                    t.map(Message::RecipesMSG)
-                }
-                Some(Screen::Recipes(_recipes)) => {
-                    self.current_screen =
-                        Some(Screen::Ingrendients(ingredients::Ingrendients::new()));
-
-                    Task::none()
-                }
-                None => Task::none(),
-            },
+            Message::ChangeModule(module) => self.change_module(module),
             Message::Booted((recipe_service, ingredient_service)) => {
-                self.recipe_service = Some(recipe_service.clone());
-                self.ingredient_service = Some(ingredient_service);
+                self.recipe_controller = Some(recipe_service.clone());
+                self.ingredient_controller = Some(ingredient_service);
 
                 let (recipes, t) = recipes::Recipes::boot(recipe_service);
 
@@ -84,15 +75,56 @@ impl App {
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        column![
-            button("Change").on_press(Message::ChangeScreen),
-            match &self.current_screen {
-                Some(Screen::Ingrendients(ingredients)) =>
-                    ingredients.view().map(Message::IngredientsMSG),
-                Some(Screen::Recipes(recipes)) => recipes.view().map(Message::RecipesMSG),
-                None => widget::text!("Booting...").into(),
+        let current_screen = match &self.current_screen {
+            Some(Screen::Ingrendients(ingredients)) => {
+                ingredients.view().map(Message::IngredientsMSG)
             }
-        ]
-        .into()
+            Some(Screen::Recipes(recipes)) => recipes.view().map(Message::RecipesMSG),
+            None => widget::text!("Booting...").into(),
+        };
+
+        let navbar = column![
+            button("Recipes").on_press(Message::ChangeModule(Module::Recipe)),
+            button("Ingrendients").on_press(Message::ChangeModule(Module::Ingredient)),
+            button("System").on_press(Message::ChangeModule(Module::System)),
+        ];
+
+        row![navbar, current_screen].into()
+    }
+
+    fn change_module(&mut self, module: Module) -> Task<Message> {
+        let current_module: Option<Module> = match &self.current_screen {
+            Some(Screen::Ingrendients(_)) => Some(Module::Ingredient),
+            Some(Screen::Recipes(_)) => Some(Module::Recipe),
+            None => None,
+        };
+
+        if let Some(m) = current_module
+            && m == module
+        {
+            return Task::none();
+        }
+
+        match module {
+            Module::Recipe => {
+                let recipe_service = self.recipe_controller.clone().unwrap();
+
+                let (recipes, t) = recipes::Recipes::boot(recipe_service);
+
+                self.current_screen = Some(Screen::Recipes(recipes));
+
+                t.map(Message::RecipesMSG)
+            }
+            Module::Ingredient => {
+                let ingredient_service = self.ingredient_controller.clone().unwrap();
+
+                let (ingredients, t) = ingredients::Ingredients::boot(ingredient_service);
+
+                self.current_screen = Some(Screen::Ingrendients(ingredients));
+
+                t.map(Message::IngredientsMSG)
+            }
+            Module::System => Task::none(),
+        }
     }
 }

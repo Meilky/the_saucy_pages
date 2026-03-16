@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(sqlx::FromRow, Serialize)]
+#[derive(sqlx::FromRow, Serialize, Debug, Clone)]
 pub struct Ingredient {
     pub uuid: Uuid,
     pub name: String,

@@ -1,0 +1,2 @@
+setup:
+	sqlx database setup

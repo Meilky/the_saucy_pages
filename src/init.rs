@@ -4,13 +4,13 @@ use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
     repositories::{ingredient::SQLiteIngredientRepository, recipe::SQLiteRecipeRepository},
-    services::{ingredient::ImplIngredientService, recipe::ImplRecipeService},
+    controllers::{ingredient::ImplIngredientService, recipe::ImplRecipeService},
 };
 
-pub type RecipeService = ImplRecipeService<SQLiteRecipeRepository, SQLiteIngredientRepository>;
-pub type IngredientService = ImplIngredientService<SQLiteIngredientRepository>;
+pub type RecipeController = ImplRecipeService<SQLiteRecipeRepository, SQLiteIngredientRepository>;
+pub type IngredientController = ImplIngredientService<SQLiteIngredientRepository>;
 
-pub async fn init() -> (RecipeService, IngredientService) {
+pub async fn init() -> (RecipeController, IngredientController) {
     let database_url =
         std::env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env or shell");
 

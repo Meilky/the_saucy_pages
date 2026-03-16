@@ -6,7 +6,7 @@ mod error;
 mod init;
 mod models;
 mod repositories;
-mod services;
+mod controllers;
 mod views;
 
 fn main() -> iced::Result {

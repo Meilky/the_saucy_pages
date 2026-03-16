@@ -1,39 +1,52 @@
 use iced::{
-    Element,
-    widget::{button, column, text},
+    Element, Task,
+    widget::{column, text},
 };
 
-pub struct Ingrendients {
-    value: i32,
+use crate::{
+    controllers::ingredient::IngredientService as _, init::IngredientController,
+    models::ingredient::Ingredient,
+};
+
+pub struct Ingredients {
+    ingredient_controller: IngredientController,
+    ingredients: Option<Vec<Ingredient>>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum Message {
-    Increment,
-    Decrement,
+    Update(Vec<Ingredient>),
 }
 
-impl Ingrendients {
-    pub fn new() -> Self {
-        Self { value: 0 }
+impl Ingredients {
+    pub fn boot(ingredient_controller: IngredientController) -> (Self, Task<Message>) {
+        (
+            Self {
+                ingredient_controller: ingredient_controller.clone(),
+                ingredients: None,
+            },
+            Task::perform(Ingredients::load(ingredient_controller), Message::Update),
+        )
+    }
+
+    pub async fn load(ingredient_controller: IngredientController) -> Vec<Ingredient> {
+        ingredient_controller.list_ingredients().await.unwrap()
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        column![
-            button("+ i").on_press(Message::Increment),
-            text(self.value).size(50),
-            button("- i").on_press(Message::Decrement),
-        ]
-        .into()
+        if let Some(ingredients) = &self.ingredients {
+            let col = column(ingredients.iter().map(|r| text(r.name.clone()).into()));
+
+            return col.into();
+        }
+
+        text("Loading...").into()
     }
 
     pub fn update(&mut self, message: Message) {
         match message {
-            Message::Increment => {
-                self.value += 1;
-            }
-            Message::Decrement => {
-                self.value -= 1;
+            Message::Update(recipes) => {
+                self.ingredients = Some(recipes);
             }
         }
     }
