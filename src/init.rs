@@ -3,8 +3,8 @@ use std::sync::Arc;
 use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
-    repositories::{ingredient::SQLiteIngredientRepository, recipe::SQLiteRecipeRepository},
     controllers::{ingredient::ImplIngredientService, recipe::ImplRecipeService},
+    repositories::{ingredient::SQLiteIngredientRepository, recipe::SQLiteRecipeRepository},
 };
 
 pub type RecipeController = ImplRecipeService<SQLiteRecipeRepository, SQLiteIngredientRepository>;

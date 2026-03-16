@@ -2,11 +2,11 @@ use dotenv::dotenv;
 
 use crate::views::app::App;
 
+mod controllers;
 mod error;
 mod init;
 mod models;
 mod repositories;
-mod controllers;
 mod views;
 
 fn main() -> iced::Result {
