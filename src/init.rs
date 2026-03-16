@@ -3,12 +3,12 @@ use std::sync::Arc;
 use sqlx::sqlite::SqlitePoolOptions;
 
 use crate::{
-    controllers::{ingredient::ImplIngredientService, recipe::ImplRecipeService},
+    controllers::{ingredient::ImplIngredientController, recipe::ImplRecipeController},
     repositories::{ingredient::SQLiteIngredientRepository, recipe::SQLiteRecipeRepository},
 };
 
-pub type RecipeController = ImplRecipeService<SQLiteRecipeRepository, SQLiteIngredientRepository>;
-pub type IngredientController = ImplIngredientService<SQLiteIngredientRepository>;
+pub type RecipeController = ImplRecipeController<SQLiteRecipeRepository, SQLiteIngredientRepository>;
+pub type IngredientController = ImplIngredientController<SQLiteIngredientRepository>;
 
 pub async fn init() -> (RecipeController, IngredientController) {
     let database_url =
@@ -27,8 +27,8 @@ pub async fn init() -> (RecipeController, IngredientController) {
     let ingredient_repository = Arc::new(SQLiteIngredientRepository::new(Arc::clone(&arc_pool)));
     let recipe_repository = Arc::new(SQLiteRecipeRepository::new(Arc::clone(&arc_pool)));
 
-    let ingredient_service = ImplIngredientService::new(ingredient_repository.clone());
-    let recipe_service = ImplRecipeService::new(recipe_repository, ingredient_repository);
+    let ingredient_service = ImplIngredientController::new(ingredient_repository.clone());
+    let recipe_service = ImplRecipeController::new(recipe_repository, ingredient_repository);
 
     (recipe_service, ingredient_service)
 }

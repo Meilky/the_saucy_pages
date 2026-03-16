@@ -8,7 +8,7 @@ use crate::models::recipe::{CreateRecipe, Recipe};
 use crate::repositories::ingredient::IngredientRepository;
 use crate::repositories::recipe::RecipeRepository;
 
-pub trait RecipeService: Send + Sync {
+pub trait RecipeController: Send + Sync {
     async fn list_recipes(&self) -> Result<Vec<Recipe>, AppError>;
     async fn find_recipe_by_uuid(&self, uuid: Uuid) -> Result<Recipe, AppError>;
     async fn list_ingredients_for_recipe_by_uuid(
@@ -19,12 +19,12 @@ pub trait RecipeService: Send + Sync {
 }
 
 #[derive(Debug, Clone)]
-pub struct ImplRecipeService<RR: RecipeRepository, IR: IngredientRepository> {
+pub struct ImplRecipeController<RR: RecipeRepository, IR: IngredientRepository> {
     recipe_repo: Arc<RR>,
     ingredient_repo: Arc<IR>,
 }
 
-impl<RR: RecipeRepository, IR: IngredientRepository> ImplRecipeService<RR, IR> {
+impl<RR: RecipeRepository, IR: IngredientRepository> ImplRecipeController<RR, IR> {
     pub fn new(recipe_repo: Arc<RR>, ingredient_repo: Arc<IR>) -> Self {
         Self {
             recipe_repo,
@@ -33,7 +33,7 @@ impl<RR: RecipeRepository, IR: IngredientRepository> ImplRecipeService<RR, IR> {
     }
 }
 
-impl<RR: RecipeRepository, IR: IngredientRepository> RecipeService for ImplRecipeService<RR, IR> {
+impl<RR: RecipeRepository, IR: IngredientRepository> RecipeController for ImplRecipeController<RR, IR> {
     async fn list_recipes(&self) -> Result<Vec<Recipe>, AppError> {
         self.recipe_repo.find_all().await
     }

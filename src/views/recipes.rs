@@ -4,7 +4,7 @@ use iced::{
 };
 
 use crate::{
-    controllers::recipe::RecipeService as _, init::RecipeController, models::recipe::Recipe,
+    controllers::recipe::RecipeController as _, init::RecipeController, models::recipe::Recipe,
 };
 
 pub struct Recipes {

@@ -4,7 +4,7 @@ use iced::{
 };
 
 use crate::{
-    controllers::ingredient::IngredientService as _, init::IngredientController,
+    controllers::ingredient::IngredientController as _, init::IngredientController,
     models::ingredient::Ingredient,
 };
 
