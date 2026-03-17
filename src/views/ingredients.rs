@@ -4,50 +4,83 @@ use iced::{
 };
 
 use crate::{
-    controllers::ingredient::IngredientController as _, init::IngredientController,
-    models::ingredient::Ingredient,
+    controllers::ingredient::IngredientController as _,
+    init::IngredientController,
+    models::ingredient::{CreateIngredient, Ingredient},
 };
 
-pub struct Ingredients {
+enum State {
+    Loading,
+    Loaded,
+}
+
+pub struct IngredientsView {
+    current_state: State,
     ingredient_controller: IngredientController,
-    ingredients: Option<Vec<Ingredient>>,
+    ingredients: Vec<Ingredient>,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Update(Vec<Ingredient>),
+    Load,
+    Loaded(Vec<Ingredient>),
+    Create(CreateIngredient),
 }
 
-impl Ingredients {
+async fn load_ingredients(controller: IngredientController) -> Vec<Ingredient> {
+    controller.list_ingredients().await.unwrap()
+}
+
+async fn create_ingredient(
+    controller: IngredientController,
+    ingredient_to_create: CreateIngredient,
+) {
+    let _ = controller.create_ingredient(ingredient_to_create).await;
+}
+
+impl IngredientsView {
     pub fn boot(ingredient_controller: IngredientController) -> (Self, Task<Message>) {
         (
             Self {
-                ingredient_controller: ingredient_controller.clone(),
-                ingredients: None,
+                current_state: State::Loading,
+                ingredient_controller: ingredient_controller,
+                ingredients: vec![],
             },
-            Task::perform(Ingredients::load(ingredient_controller), Message::Update),
+            Task::done(Message::Load),
         )
     }
 
-    pub async fn load(ingredient_controller: IngredientController) -> Vec<Ingredient> {
-        ingredient_controller.list_ingredients().await.unwrap()
+    pub fn update(&mut self, message: Message) -> Task<Message> {
+        match message {
+            Message::Load => {
+                let controller = self.ingredient_controller.clone();
+
+                Task::perform(load_ingredients(controller), Message::Loaded)
+            }
+            Message::Loaded(ingredients) => {
+                self.ingredients = ingredients;
+                self.current_state = State::Loaded;
+
+                Task::none()
+            }
+            Message::Create(ingredient_to_create) => {
+                let controller = self.ingredient_controller.clone();
+
+                Task::perform(create_ingredient(controller, ingredient_to_create), |_| {
+                    Message::Load
+                })
+            }
+        }
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        if let Some(ingredients) = &self.ingredients {
-            let col = column(ingredients.iter().map(|r| text(r.name.clone()).into()));
+        let ingredients = column(self.ingredients.iter().map(|r| text(r.name.clone()).into()));
 
-            return col.into();
-        }
+        let s = match self.current_state {
+            State::Loading => text("Loading..."),
+            State::Loaded => text("Loaded"),
+        };
 
-        text("Loading...").into()
-    }
-
-    pub fn update(&mut self, message: Message) {
-        match message {
-            Message::Update(recipes) => {
-                self.ingredients = Some(recipes);
-            }
-        }
+        column![s, ingredients].into()
     }
 }

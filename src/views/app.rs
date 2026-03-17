@@ -7,8 +7,8 @@ use crate::views::recipes;
 use crate::{init, views::ingredients};
 
 enum Screen {
-    Recipes(recipes::Recipes),
-    Ingrendients(ingredients::Ingredients),
+    Recipes(recipes::RecipesView),
+    Ingrendients(ingredients::IngredientsView),
 }
 
 pub struct App {
@@ -55,7 +55,7 @@ impl App {
             }
             Message::IngredientsMSG(message) => {
                 if let Some(Screen::Ingrendients(ingredients)) = &mut self.current_screen {
-                    ingredients.update(message)
+                    return ingredients.update(message).map(Message::IngredientsMSG);
                 }
 
                 Task::none()
@@ -65,7 +65,7 @@ impl App {
                 self.recipe_controller = Some(recipe_controller.clone());
                 self.ingredient_controller = Some(ingredient_controller);
 
-                let (recipes, t) = recipes::Recipes::boot(recipe_controller);
+                let (recipes, t) = recipes::RecipesView::boot(recipe_controller);
 
                 self.current_screen = Some(Screen::Recipes(recipes));
 
@@ -109,7 +109,7 @@ impl App {
             Module::Recipe => {
                 let recipe_controller = self.recipe_controller.clone().unwrap();
 
-                let (recipes, t) = recipes::Recipes::boot(recipe_controller);
+                let (recipes, t) = recipes::RecipesView::boot(recipe_controller);
 
                 self.current_screen = Some(Screen::Recipes(recipes));
 
@@ -118,7 +118,7 @@ impl App {
             Module::Ingredient => {
                 let ingredient_controller = self.ingredient_controller.clone().unwrap();
 
-                let (ingredients, t) = ingredients::Ingredients::boot(ingredient_controller);
+                let (ingredients, t) = ingredients::IngredientsView::boot(ingredient_controller);
 
                 self.current_screen = Some(Screen::Ingrendients(ingredients));
 

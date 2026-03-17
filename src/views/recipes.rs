@@ -14,7 +14,7 @@ enum State {
     Loaded,
 }
 
-pub struct Recipes {
+pub struct RecipesView {
     current_state: State,
     recipe_controller: RecipeController,
     recipes: Vec<Recipe>,
@@ -35,7 +35,7 @@ async fn create_recipe(controller: RecipeController, recipe_to_create: CreateRec
     let _ = controller.create_recipe(recipe_to_create).await;
 }
 
-impl Recipes {
+impl RecipesView {
     pub fn boot(recipe_controller: RecipeController) -> (Self, Task<Message>) {
         (
             Self {

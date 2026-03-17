@@ -8,7 +8,7 @@ pub struct Ingredient {
     pub description: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct CreateIngredient {
     pub name: String,
     pub description: Option<String>,
