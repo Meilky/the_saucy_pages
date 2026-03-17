@@ -1,6 +1,6 @@
 use iced::{
     Element, Task,
-    widget::{column, text},
+    widget::{button, column, text, text_input},
 };
 
 use crate::{
@@ -15,6 +15,8 @@ enum State {
 }
 
 pub struct IngredientsView {
+    name_input_content: String,
+    description_input_content: String,
     current_state: State,
     ingredient_controller: IngredientController,
     ingredients: Vec<Ingredient>,
@@ -25,6 +27,9 @@ pub enum Message {
     Load,
     Loaded(Vec<Ingredient>),
     Create(CreateIngredient),
+    NameInputUpdated(String),
+    DescriptionInputUpdated(String),
+    FormSubmited,
 }
 
 async fn load_ingredients(controller: IngredientController) -> Vec<Ingredient> {
@@ -42,6 +47,8 @@ impl IngredientsView {
     pub fn boot(ingredient_controller: IngredientController) -> (Self, Task<Message>) {
         (
             Self {
+                name_input_content: String::new(),
+                description_input_content: String::new(),
                 current_state: State::Loading,
                 ingredient_controller: ingredient_controller,
                 ingredients: vec![],
@@ -70,6 +77,26 @@ impl IngredientsView {
                     Message::Load
                 })
             }
+            Message::NameInputUpdated(content) => {
+                self.name_input_content = content;
+                Task::none()
+            }
+            Message::DescriptionInputUpdated(content) => {
+                self.description_input_content = content;
+                Task::none()
+            }
+            Message::FormSubmited => {
+                let name = self.name_input_content.clone();
+                let mut description: Option<String> = None;
+
+                if !self.description_input_content.is_empty() {
+                    description = Some(self.description_input_content.clone());
+                }
+
+                let ingredient_to_create = CreateIngredient { name, description };
+
+                Task::done(Message::Create(ingredient_to_create))
+            }
         }
     }
 
@@ -81,6 +108,13 @@ impl IngredientsView {
             State::Loaded => text("Loaded"),
         };
 
-        column![s, ingredients].into()
+        let create_form = column![
+            text_input("Name", &self.name_input_content).on_input(Message::NameInputUpdated),
+            text_input("Description", &self.description_input_content)
+                .on_input(Message::DescriptionInputUpdated),
+            button("Submit").on_press(Message::FormSubmited)
+        ];
+
+        column![s, ingredients, create_form].into()
     }
 }
