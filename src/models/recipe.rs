@@ -41,7 +41,7 @@ pub struct Recipe {
     pub instructions: Vec<RecipeInstruction>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct CreateRecipe {
     pub name: String,
     pub description: String,

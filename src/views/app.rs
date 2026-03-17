@@ -48,7 +48,7 @@ impl App {
         match message {
             Message::RecipesMSG(message) => {
                 if let Some(Screen::Recipes(recipes)) = &mut self.current_screen {
-                    recipes.update(message)
+                    return recipes.update(message).map(Message::RecipesMSG);
                 }
 
                 Task::none()
